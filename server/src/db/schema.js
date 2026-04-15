@@ -116,7 +116,43 @@ function initializeSchema() {
     CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
   `);
 
+  // Seed templates from disk
+  seedTemplates(db);
+
   return db;
+}
+
+function seedTemplates(db) {
+  const fs = require('fs');
+  const templatesDir = path.join(__dirname, '..', '..', '..', 'templates');
+
+  if (!fs.existsSync(templatesDir)) return;
+
+  const dirs = fs.readdirSync(templatesDir, { withFileTypes: true }).filter(d => d.isDirectory());
+
+  const upsert = db.prepare(`
+    INSERT INTO templates (id, name, description, file_path, default_settings_json)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      name = excluded.name,
+      description = excluded.description,
+      file_path = excluded.file_path,
+      default_settings_json = excluded.default_settings_json
+  `);
+
+  for (const dir of dirs) {
+    const metaPath = path.join(templatesDir, dir.name, 'meta.json');
+    if (!fs.existsSync(metaPath)) continue;
+
+    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+    upsert.run(
+      meta.id,
+      meta.name,
+      meta.description || '',
+      dir.name,
+      JSON.stringify(meta.defaults || {})
+    );
+  }
 }
 
 module.exports = { getDb, initializeSchema };

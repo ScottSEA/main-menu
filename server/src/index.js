@@ -19,6 +19,11 @@ console.log('Database initialized');
 // API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/menus', require('./routes/menus'));
+app.use('/api/templates', require('./routes/templates'));
+app.use('/api/publish', require('./routes/publish'));
+
+// Public menu serving (subscription-gated)
+app.use('/menu', require('./routes/serve'));
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -40,6 +40,7 @@ A SaaS platform where restaurant subscribers can **create, customize, and publis
 
 ### Subscription & Auth
 - **User Authentication** — Sign up, log in, manage account
+- **OAuth (Planned)** — Google, Facebook, Microsoft, Apple login via Passport.js
 - **Stripe Integration** — Subscription tiers with payment processing
 - **Tier-Based Features** — Free trial → paid tiers with increasing capabilities
 

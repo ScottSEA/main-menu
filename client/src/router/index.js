@@ -23,6 +23,12 @@ const routes = [
     component: () => import('../views/DashboardView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/editor/:id',
+    name: 'MenuEditor',
+    component: () => import('../views/MenuEditorView.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({

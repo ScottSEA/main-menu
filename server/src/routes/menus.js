@@ -139,6 +139,36 @@ router.get('/menus/:id', (req, res) => {
   res.json({ ...menu, pages });
 });
 
+router.put('/menus/:id', (req, res) => {
+  const { name, width_px, height_px, template_id, settings_json } = req.body;
+  const db = getDb();
+
+  const menu = db.prepare(`
+    SELECT m.* FROM menus m
+    JOIN restaurants r ON m.restaurant_id = r.id
+    WHERE m.id = ? AND r.user_id = ?
+  `).get(req.params.id, req.user.id);
+
+  if (!menu) {
+    return res.status(404).json({ error: 'Menu not found' });
+  }
+
+  db.prepare(`
+    UPDATE menus SET name = ?, width_px = ?, height_px = ?, template_id = ?, settings_json = ?, updated_at = datetime('now')
+    WHERE id = ?
+  `).run(
+    name ?? menu.name,
+    width_px ?? menu.width_px,
+    height_px ?? menu.height_px,
+    template_id !== undefined ? template_id : menu.template_id,
+    settings_json ?? menu.settings_json,
+    req.params.id
+  );
+
+  const updated = db.prepare('SELECT * FROM menus WHERE id = ?').get(req.params.id);
+  res.json(updated);
+});
+
 router.delete('/menus/:id', (req, res) => {
   const db = getDb();
   const menu = db.prepare(`

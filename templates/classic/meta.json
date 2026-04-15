@@ -1,0 +1,12 @@
+{
+  "id": "classic",
+  "name": "Classic",
+  "description": "Clean, traditional menu layout with dotted price lines. Works great on any screen size.",
+  "defaults": {
+    "fontFamily": "'Georgia', 'Times New Roman', serif",
+    "backgroundColor": "#1a1a2e",
+    "textColor": "#e0e0e0",
+    "accentColor": "#d4a574",
+    "columns": 2
+  }
+}
