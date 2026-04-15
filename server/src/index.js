@@ -10,6 +10,9 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
+
+// Stripe webhook needs raw body — mount BEFORE express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 // Initialize database
@@ -21,6 +24,8 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/menus', require('./routes/menus'));
 app.use('/api/templates', require('./routes/templates'));
 app.use('/api/publish', require('./routes/publish'));
+app.use('/api/stripe', require('./routes/stripe'));
+app.use('/api/uploads', require('./routes/uploads'));
 
 // Public menu serving (subscription-gated)
 app.use('/menu', require('./routes/serve'));
