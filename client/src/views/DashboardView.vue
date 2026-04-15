@@ -11,9 +11,15 @@
 
       <div v-if="showNewRestaurant" class="new-form">
         <input v-model="newName" placeholder="Restaurant name" />
-        <input v-model="newSlug" placeholder="URL slug (e.g. joes-diner)" />
+        <div class="slug-field">
+          <label>Your menu will be at: <strong>/menu/{{ newSlug || '...' }}</strong></label>
+          <input v-model="newSlug" placeholder="e.g. joes-diner" @input="sanitizeSlug" />
+          <span v-if="slugChecking" class="slug-status checking">Checking...</span>
+          <span v-else-if="slugAvailable === true" class="slug-status available">✓ Available</span>
+          <span v-else-if="slugAvailable === false" class="slug-status taken">✕ Already taken</span>
+        </div>
         <div class="form-actions">
-          <button @click="createRestaurant" class="btn btn-primary btn-small">Create</button>
+          <button @click="createRestaurant" class="btn btn-primary btn-small" :disabled="!newName || !newSlug || slugAvailable === false || slugChecking">Create</button>
           <button @click="showNewRestaurant = false" class="btn btn-small">Cancel</button>
         </div>
         <p v-if="createError" class="error">{{ createError }}</p>
@@ -46,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
@@ -55,7 +61,39 @@ const restaurants = ref([])
 const showNewRestaurant = ref(false)
 const newName = ref('')
 const newSlug = ref('')
+const slugManuallyEdited = ref(false)
+const slugAvailable = ref(null)
+const slugChecking = ref(false)
 const createError = ref('')
+let slugCheckTimer = null
+
+// Auto-generate slug from name unless user manually edited it
+watch(newName, (val) => {
+  if (!slugManuallyEdited.value) {
+    newSlug.value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  }
+})
+
+watch(newSlug, (val) => {
+  if (val.length < 3) {
+    slugAvailable.value = null
+    return
+  }
+  slugChecking.value = true
+  clearTimeout(slugCheckTimer)
+  slugCheckTimer = setTimeout(async () => {
+    try {
+      const res = await axios.get(`/api/menus/restaurants/check-slug/${val}`)
+      slugAvailable.value = res.data.available
+    } catch { slugAvailable.value = null }
+    slugChecking.value = false
+  }, 400)
+})
+
+function sanitizeSlug() {
+  slugManuallyEdited.value = true
+  newSlug.value = newSlug.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+}
 
 async function loadRestaurants() {
   const res = await axios.get('/api/menus/restaurants')
@@ -76,6 +114,8 @@ async function createRestaurant() {
     })
     newName.value = ''
     newSlug.value = ''
+    slugManuallyEdited.value = false
+    slugAvailable.value = null
     showNewRestaurant.value = false
     await loadRestaurants()
   } catch (err) {
@@ -126,6 +166,12 @@ onMounted(loadRestaurants)
   font-size: 1rem;
 }
 .form-actions { display: flex; gap: 0.5rem; }
+.slug-field label { font-size: 0.85rem; color: #9ca3af; display: block; margin-bottom: 0.25rem; }
+.slug-field label strong { color: #60a5fa; }
+.slug-status { font-size: 0.8rem; margin-top: 0.2rem; display: block; }
+.slug-status.checking { color: #9ca3af; }
+.slug-status.available { color: #34d399; }
+.slug-status.taken { color: #f87171; }
 .restaurant-card {
   padding: 1rem;
   border: 1px solid #e5e7eb;
@@ -159,7 +205,7 @@ onMounted(loadRestaurants)
 .menu-status.published { background: #d1fae5; color: #065f46; }
 .empty { color: #9ca3af; padding: 2rem; text-align: center; }
 .error { color: #dc2626; font-size: 0.9rem; }
-.btn { padding: 0.5rem 1rem; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 0.9rem; background: white; text-decoration: none; }
+.btn { padding: 0.5rem 1rem; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 0.9rem; background: #374151; color: #e5e7eb; text-decoration: none; }
 .btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
 .btn-small { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
 </style>

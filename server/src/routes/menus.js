@@ -5,7 +5,14 @@ const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All routes require authentication
+// Public: check slug availability (no auth required)
+router.get('/restaurants/check-slug/:slug', (req, res) => {
+  const db = getDb();
+  const existing = db.prepare('SELECT id FROM restaurants WHERE slug = ?').get(req.params.slug);
+  res.json({ available: !existing });
+});
+
+// All remaining routes require authentication
 router.use(authenticate);
 
 // --- Restaurants ---
