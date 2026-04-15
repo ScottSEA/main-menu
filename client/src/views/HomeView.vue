@@ -28,7 +28,7 @@ h1 {
 }
 p {
   font-size: 1.2rem;
-  color: #666;
+  color: var(--text-muted);
   margin-bottom: 2rem;
 }
 .actions {
@@ -44,11 +44,12 @@ p {
   font-size: 1rem;
 }
 .btn-primary {
-  background: #2563eb;
+  background: var(--accent);
   color: white;
 }
 .btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 </style>

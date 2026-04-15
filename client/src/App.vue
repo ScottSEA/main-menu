@@ -36,13 +36,14 @@ function handleLogout() {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
 }
 .logo {
   font-size: 1.3rem;
   font-weight: 700;
   text-decoration: none;
-  color: #111827;
+  color: #f9fafb;
 }
 nav {
   display: flex;
@@ -51,15 +52,17 @@ nav {
 }
 nav a {
   text-decoration: none;
-  color: #4b5563;
+  color: var(--text);
   font-weight: 500;
 }
+nav a:hover { color: #f9fafb; }
 .logout-btn {
   background: none;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.35rem 0.75rem;
   cursor: pointer;
-  color: #4b5563;
+  color: var(--text);
 }
+.logout-btn:hover { color: #f9fafb; border-color: var(--text); }
 </style>

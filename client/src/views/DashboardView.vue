@@ -70,7 +70,7 @@ let slugCheckTimer = null
 // Auto-generate slug from name unless user manually edited it
 watch(newName, (val) => {
   if (!slugManuallyEdited.value) {
-    newSlug.value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    newSlug.value = val.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, '-').replace(/^-|-$/g, '')
   }
 })
 
@@ -155,28 +155,24 @@ onMounted(loadRestaurants)
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 1rem;
 }
-.new-form input {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 1rem;
-}
 .form-actions { display: flex; gap: 0.5rem; }
-.slug-field label { font-size: 0.85rem; color: #9ca3af; display: block; margin-bottom: 0.25rem; }
+.slug-field label { font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem; }
 .slug-field label strong { color: #60a5fa; }
 .slug-status { font-size: 0.8rem; margin-top: 0.2rem; display: block; }
-.slug-status.checking { color: #9ca3af; }
-.slug-status.available { color: #34d399; }
+.slug-status.checking { color: var(--text-muted); }
+.slug-status.available { color: var(--success); }
 .slug-status.taken { color: #f87171; }
 .restaurant-card {
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 0.75rem;
+  background: var(--bg-surface);
 }
 .restaurant-header {
   display: flex;
@@ -184,14 +180,15 @@ onMounted(loadRestaurants)
   align-items: flex-start;
 }
 .restaurant-card h4 { margin: 0 0 0.25rem; }
-.slug { color: #6b7280; font-size: 0.9rem; }
+.slug { color: var(--text-muted); font-size: 0.9rem; }
 .menu-list { margin-top: 0.75rem; }
 .menu-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0.75rem;
-  background: #f9fafb;
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: 6px;
   margin-bottom: 0.4rem;
 }
@@ -201,11 +198,12 @@ onMounted(loadRestaurants)
   border-radius: 3px;
   margin-left: 0.5rem;
 }
-.menu-status.draft { background: #fef3c7; color: #92400e; }
-.menu-status.published { background: #d1fae5; color: #065f46; }
-.empty { color: #9ca3af; padding: 2rem; text-align: center; }
-.error { color: #dc2626; font-size: 0.9rem; }
-.btn { padding: 0.5rem 1rem; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 0.9rem; background: #374151; color: #e5e7eb; text-decoration: none; }
-.btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
+.menu-status.draft { background: #92400e33; color: var(--warning); }
+.menu-status.published { background: #065f4633; color: var(--success); }
+.empty { color: var(--text-muted); padding: 2rem; text-align: center; }
+.error { color: var(--danger); font-size: 0.9rem; }
+.btn { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.9rem; background: var(--bg-surface); color: var(--text); text-decoration: none; }
+.btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-primary:disabled { background: #1e3a5f; color: #6b7280; border-color: #1e3a5f; cursor: not-allowed; opacity: 0.6; }
 .btn-small { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
 </style>
