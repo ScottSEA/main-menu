@@ -6,6 +6,7 @@
     <section class="restaurants">
       <div class="section-header">
         <h3>Your Restaurants</h3>
+        <router-link to="/wizard" class="btn btn-small btn-primary">✨ Create New Menu</router-link>
         <button @click="showNewRestaurant = true" class="btn btn-small">+ Add Restaurant</button>
       </div>
 

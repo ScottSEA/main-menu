@@ -17,6 +17,7 @@ function handleLogout() {
     <nav>
       <template v-if="auth.isAuthenticated">
         <router-link to="/dashboard">Dashboard</router-link>
+        <router-link to="/subscription">Subscription</router-link>
         <button @click="handleLogout" class="logout-btn">Logout</button>
       </template>
       <template v-else>

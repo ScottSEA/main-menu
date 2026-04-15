@@ -24,9 +24,21 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/subscription',
+    name: 'Subscription',
+    component: () => import('../views/SubscriptionView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/editor/:id',
     name: 'MenuEditor',
     component: () => import('../views/MenuEditorView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/wizard',
+    name: 'Wizard',
+    component: () => import('../views/WizardView.vue'),
     meta: { requiresAuth: true },
   },
 ]

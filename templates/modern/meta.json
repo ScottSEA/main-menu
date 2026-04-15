@@ -1,0 +1,12 @@
+{
+  "id": "modern",
+  "name": "Modern",
+  "description": "Clean, card-based menu layout with a bright minimal aesthetic. Grid of rounded cards with subtle shadows.",
+  "defaults": {
+    "fontFamily": "'Helvetica Neue', Arial, sans-serif",
+    "backgroundColor": "#ffffff",
+    "textColor": "#1f2937",
+    "accentColor": "#059669",
+    "columns": 2
+  }
+}

@@ -7,7 +7,8 @@
       <router-link to="/login" class="btn btn-secondary">Sign In</router-link>
     </div>
     <div class="actions" v-else>
-      <router-link to="/dashboard" class="btn btn-primary">Go to Dashboard</router-link>
+      <router-link to="/wizard" class="btn btn-primary">Get Started</router-link>
+      <router-link to="/dashboard" class="btn btn-secondary">Go to Dashboard</router-link>
     </div>
   </div>
 </template>
