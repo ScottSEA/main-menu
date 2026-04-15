@@ -1,0 +1,13 @@
+{
+  "name": "main-menu",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Affordable, intuitive restaurant menu design for everyone.",
+  "scripts": {
+    "dev:server": "cd server && node src/index.js",
+    "dev:client": "cd client && npx vite --port 5173",
+    "dev": "npm run dev:server & npm run dev:client",
+    "build:client": "cd client && npx vite build",
+    "start": "NODE_ENV=production node server/src/index.js"
+  }
+}
