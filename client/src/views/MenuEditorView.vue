@@ -7,9 +7,24 @@
       </div>
 
       <div v-if="menu" class="editor-content">
+        <!-- Restaurant Branding -->
+        <section class="panel">
+          <h3>🏪 Branding</h3>
+          <div class="field">
+            <label>Restaurant Logo</label>
+            <div class="image-upload">
+              <img v-if="restaurantLogo" :src="restaurantLogo" class="logo-preview" />
+              <label class="upload-btn">
+                {{ restaurantLogo ? 'Change Logo' : 'Upload Logo' }}
+                <input type="file" accept="image/*" @change="uploadLogo" hidden />
+              </label>
+            </div>
+          </div>
+        </section>
+
         <!-- Menu Settings -->
         <section class="panel">
-          <h3>Display Settings</h3>
+          <h3>📐 Display Settings</h3>
           <div class="field-row">
             <div class="field">
               <label>Width (px)</label>
@@ -30,7 +45,7 @@
 
         <!-- Style Settings -->
         <section class="panel">
-          <h3>Style</h3>
+          <h3>🎨 Style</h3>
           <div class="field-row">
             <div class="field">
               <label>Background</label>
@@ -57,9 +72,22 @@
           </div>
         </section>
 
+        <!-- QR Code -->
+        <section class="panel">
+          <h3>📱 QR Code</h3>
+          <div class="field">
+            <label>Link URL (ordering, website, etc.)</label>
+            <input v-model="settings.qrUrl" placeholder="https://your-restaurant.com" @change="saveSettings" />
+          </div>
+          <div v-if="settings.qrUrl" class="qr-preview-wrapper">
+            <img v-if="qrDataUrl" :src="qrDataUrl" class="qr-preview" />
+            <button @click="generateQr" class="btn btn-small">Regenerate QR</button>
+          </div>
+        </section>
+
         <!-- Pages & Categories -->
         <section class="panel" v-for="page in pages" :key="page.id">
-          <h3>Page {{ page.page_order + 1 }}</h3>
+          <h3>📄 Page {{ page.page_order + 1 }}</h3>
 
           <div v-for="category in page.categories" :key="category.id" class="category-block">
             <div class="category-header">
@@ -74,9 +102,31 @@
                 <input v-model.number="item.price_display" placeholder="0.00" class="item-price-input" type="number" step="0.01" @change="updateItemPrice(item)" />
               </div>
               <input v-model="item.description" placeholder="Description (optional)" class="item-desc-input" @change="updateItem(item)" />
+
+              <!-- Item photo -->
+              <div class="item-image-row">
+                <img v-if="item.image_url" :src="item.image_url" class="item-thumb" />
+                <label class="upload-btn upload-btn-small">
+                  {{ item.image_url ? '📷' : '+ Photo' }}
+                  <input type="file" accept="image/*" @change="uploadItemImage($event, item)" hidden />
+                </label>
+                <button v-if="item.image_url" @click="removeItemImage(item)" class="btn-icon btn-icon-small" title="Remove photo">✕</button>
+              </div>
+
+              <!-- Dietary tags -->
+              <div class="dietary-row">
+                <button
+                  v-for="tag in DIETARY_OPTIONS"
+                  :key="tag.code"
+                  :class="['tag-btn', { active: itemHasTag(item, tag.code) }]"
+                  :title="tag.label"
+                  @click="toggleDietaryTag(item, tag.code)"
+                >{{ tag.icon }}</button>
+              </div>
+
               <div class="item-meta">
                 <label class="checkbox-label">
-                  <input type="checkbox" v-model="item.is_special_bool" @change="updateItem(item)" /> Special
+                  <input type="checkbox" v-model="item.is_special_bool" @change="updateItem(item)" /> ⭐ Special
                 </label>
                 <button @click="deleteItem(item)" class="btn-icon btn-icon-small" title="Delete item">✕</button>
               </div>
@@ -114,12 +164,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
 const route = useRoute()
 const menuId = route.params.id
+
+const DIETARY_OPTIONS = [
+  { code: 'V', icon: '🌱', label: 'Vegetarian' },
+  { code: 'VG', icon: '🌿', label: 'Vegan' },
+  { code: 'GF', icon: '🌾', label: 'Gluten Free' },
+  { code: 'DF', icon: '🥛', label: 'Dairy Free' },
+  { code: 'NF', icon: '🥜', label: 'Nut Free' },
+  { code: '🌶', icon: '🌶️', label: 'Spicy' },
+]
 
 const menu = ref(null)
 const pages = ref([])
@@ -128,6 +187,9 @@ const settings = ref({})
 const publishing = ref(false)
 const publishedSlug = ref('')
 const previewFrame = ref(null)
+const restaurantLogo = ref(null)
+const restaurantId = ref(null)
+const qrDataUrl = ref(null)
 
 const previewStyle = computed(() => {
   if (!menu.value) return {}
@@ -153,13 +215,21 @@ async function loadMenu() {
       for (const item of cat.items || []) {
         item.price_display = (item.price_cents / 100).toFixed(2)
         item.is_special_bool = !!item.is_special
+        item.parsedTags = JSON.parse(item.dietary_tags || '[]')
       }
     }
   }
 
-  // Get restaurant slug for published link
+  // Get restaurant slug and logo for published link
   const restRes = await axios.get(`/api/menus/restaurants/${menu.value.restaurant_id}`)
   publishedSlug.value = restRes.data.slug
+  restaurantLogo.value = restRes.data.logo_url
+  restaurantId.value = restRes.data.id
+
+  // Generate QR if URL is set
+  if (settings.value.qrUrl) {
+    generateQr()
+  }
 
   await nextTick()
   refreshPreview()
@@ -218,6 +288,8 @@ async function updateItem(item) {
     description: item.description,
     price_cents: item.price_cents,
     is_special: item.is_special_bool,
+    dietary_tags: item.parsedTags || [],
+    image_url: item.image_url,
   })
   refreshPreview()
 }
@@ -261,6 +333,80 @@ async function publish() {
     alert(err.response?.data?.error || 'Publish failed')
   } finally {
     publishing.value = false
+  }
+}
+
+// --- Image uploads ---
+
+async function uploadFile(file) {
+  const formData = new FormData()
+  formData.append('image', file)
+  const res = await axios.post('/api/uploads', formData)
+  return res.data.url
+}
+
+async function uploadLogo(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  try {
+    const url = await uploadFile(file)
+    restaurantLogo.value = url
+    await axios.put(`/api/menus/restaurants/${restaurantId.value}`, { logo_url: url })
+    refreshPreview()
+  } catch (err) {
+    alert('Logo upload failed: ' + (err.response?.data?.error || err.message))
+  }
+}
+
+async function uploadItemImage(event, item) {
+  const file = event.target.files[0]
+  if (!file) return
+  try {
+    const url = await uploadFile(file)
+    item.image_url = url
+    await axios.put(`/api/menus/items/${item.id}`, { image_url: url })
+    refreshPreview()
+  } catch (err) {
+    alert('Image upload failed: ' + (err.response?.data?.error || err.message))
+  }
+}
+
+async function removeItemImage(item) {
+  item.image_url = null
+  await axios.put(`/api/menus/items/${item.id}`, { image_url: null })
+  refreshPreview()
+}
+
+// --- Dietary tags ---
+
+function itemHasTag(item, code) {
+  const tags = Array.isArray(item.parsedTags) ? item.parsedTags : []
+  return tags.includes(code)
+}
+
+function toggleDietaryTag(item, code) {
+  if (!Array.isArray(item.parsedTags)) item.parsedTags = []
+  const idx = item.parsedTags.indexOf(code)
+  if (idx >= 0) {
+    item.parsedTags.splice(idx, 1)
+  } else {
+    item.parsedTags.push(code)
+  }
+  item.dietary_tags = JSON.stringify(item.parsedTags)
+  updateItem(item)
+}
+
+// --- QR Code ---
+
+async function generateQr() {
+  if (!settings.value.qrUrl) return
+  try {
+    const res = await axios.post('/api/qrcode/generate', { url: settings.value.qrUrl, size: 200 })
+    qrDataUrl.value = res.data.dataUrl
+    settings.value.qrDataUrl = res.data.dataUrl
+    saveSettings()
+  } catch (err) {
+    console.error('QR generation failed:', err)
   }
 }
 
@@ -419,7 +565,50 @@ onMounted(() => {
 .btn-icon:hover { color: var(--danger); }
 .btn-icon-small { font-size: 0.8rem; }
 
+/* Image uploads */
+.image-upload { display: flex; align-items: center; gap: 0.75rem; }
+.logo-preview { width: 60px; height: 60px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); }
+.upload-btn {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+}
+.upload-btn:hover { border-color: var(--accent); }
+.upload-btn-small { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
+
+/* Item images */
+.item-image-row { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.3rem; }
+.item-thumb { width: 36px; height: 36px; object-fit: cover; border-radius: 3px; }
+
+/* Dietary tags */
+.dietary-row { display: flex; gap: 0.3rem; margin-top: 0.3rem; flex-wrap: wrap; }
+.tag-btn {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.tag-btn:hover { opacity: 0.7; }
+.tag-btn.active { opacity: 1; border-color: var(--accent); background: var(--bg-surface); }
+
+/* QR Code */
+.qr-preview-wrapper { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+.qr-preview { width: 80px; height: 80px; border-radius: 4px; background: white; padding: 4px; }
+
 .btn { padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text); }
+.btn-small { padding: 0.35rem 0.6rem; font-size: 0.8rem; }
 .btn-link { border: none; background: none; color: var(--accent); padding: 0.25rem 0; font-size: 0.85rem; }
 .btn-outline { width: 100%; margin-top: 0.5rem; }
 .btn-primary { background: var(--accent); color: white; border-color: var(--accent); width: 100%; padding: 0.75rem; font-size: 1rem; }

@@ -58,7 +58,7 @@ router.get('/restaurants/:id', (req, res) => {
 });
 
 router.put('/restaurants/:id', (req, res) => {
-  const { name } = req.body;
+  const { name, logo_url } = req.body;
   const db = getDb();
 
   const restaurant = db.prepare('SELECT * FROM restaurants WHERE id = ? AND user_id = ?').get(req.params.id, req.user.id);
@@ -66,7 +66,11 @@ router.put('/restaurants/:id', (req, res) => {
     return res.status(404).json({ error: 'Restaurant not found' });
   }
 
-  db.prepare('UPDATE restaurants SET name = ? WHERE id = ?').run(name || restaurant.name, req.params.id);
+  db.prepare('UPDATE restaurants SET name = ?, logo_url = ? WHERE id = ?').run(
+    name ?? restaurant.name,
+    logo_url !== undefined ? logo_url : restaurant.logo_url,
+    req.params.id
+  );
   const updated = db.prepare('SELECT * FROM restaurants WHERE id = ?').get(req.params.id);
   res.json(updated);
 });
@@ -306,7 +310,7 @@ router.post('/categories/:categoryId/items', (req, res) => {
 });
 
 router.put('/items/:id', (req, res) => {
-  const { name, description, price_cents, dietary_tags, is_special, sort_order } = req.body;
+  const { name, description, price_cents, dietary_tags, is_special, sort_order, image_url } = req.body;
   const db = getDb();
 
   const item = db.prepare(`
@@ -323,7 +327,7 @@ router.put('/items/:id', (req, res) => {
   }
 
   db.prepare(`
-    UPDATE menu_items SET name = ?, description = ?, price_cents = ?, dietary_tags = ?, is_special = ?, sort_order = ?
+    UPDATE menu_items SET name = ?, description = ?, price_cents = ?, dietary_tags = ?, is_special = ?, sort_order = ?, image_url = ?
     WHERE id = ?
   `).run(
     name ?? item.name,
@@ -332,6 +336,7 @@ router.put('/items/:id', (req, res) => {
     dietary_tags ? JSON.stringify(dietary_tags) : item.dietary_tags,
     is_special !== undefined ? (is_special ? 1 : 0) : item.is_special,
     sort_order ?? item.sort_order,
+    image_url !== undefined ? image_url : item.image_url,
     req.params.id
   );
 

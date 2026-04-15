@@ -63,6 +63,7 @@ function compileMenu(menuId) {
     logoUrl: restaurant.logo_url,
     widthPx: menu.width_px,
     heightPx: menu.height_px,
+    qrDataUrl: settings.qrDataUrl || null,
     pages: pageData,
     ...settings,
   });

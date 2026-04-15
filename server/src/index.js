@@ -26,6 +26,7 @@ app.use('/api/templates', require('./routes/templates'));
 app.use('/api/publish', require('./routes/publish'));
 app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/uploads', require('./routes/uploads'));
+app.use('/api/qrcode', require('./routes/qrcode'));
 
 // Public menu serving (subscription-gated)
 app.use('/menu', require('./routes/serve'));

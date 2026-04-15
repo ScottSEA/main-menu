@@ -77,6 +77,24 @@
       margin-bottom: 0.6em;
     }
 
+    .item-with-image {
+      display: flex;
+      gap: 0.8em;
+      align-items: flex-start;
+    }
+
+    .item-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .item-content {
+      flex: 1;
+    }
+
     .item-row {
       display: flex;
       justify-content: space-between;
@@ -142,6 +160,16 @@
       padding-top: 1%;
       font-size: 0.8em;
       opacity: 0.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1em;
+    }
+
+    .qr-code {
+      width: 80px;
+      height: 80px;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -160,21 +188,24 @@
         <div class="category">
           <div class="category-name">{{this.name}}</div>
           {{#each this.items}}
-          <div class="menu-item">
-            <div class="item-row">
-              <span class="item-name">
-                {{this.name}}
-                {{#if this.is_special}}<span class="special-badge">★ Special</span>{{/if}}
-                {{#if this.dietaryTags.length}}
-                <span class="dietary-tags">
-                  {{#each this.dietaryTags}}<span class="dietary-tag">{{this}}</span>{{/each}}
+          <div class="menu-item {{#if this.image_url}}item-with-image{{/if}}">
+            {{#if this.image_url}}<img class="item-image" src="{{this.image_url}}" alt="{{this.name}}" />{{/if}}
+            <div class="item-content">
+              <div class="item-row">
+                <span class="item-name">
+                  {{this.name}}
+                  {{#if this.is_special}}<span class="special-badge">★ Special</span>{{/if}}
+                  {{#if this.dietaryTags.length}}
+                  <span class="dietary-tags">
+                    {{#each this.dietaryTags}}<span class="dietary-tag">{{this}}</span>{{/each}}
+                  </span>
+                  {{/if}}
                 </span>
-                {{/if}}
-              </span>
-              <span class="item-dots"></span>
-              <span class="item-price">{{this.formattedPrice}}</span>
+                <span class="item-dots"></span>
+                <span class="item-price">{{this.formattedPrice}}</span>
+              </div>
+              {{#if this.description}}<div class="item-description">{{this.description}}</div>{{/if}}
             </div>
-            {{#if this.description}}<div class="item-description">{{this.description}}</div>{{/if}}
           </div>
           {{/each}}
         </div>
@@ -183,7 +214,10 @@
       {{/each}}
     </div>
 
-    <div class="menu-footer">{{../restaurantName}}</div>
+    <div class="menu-footer">
+      {{#if ../qrDataUrl}}<img class="qr-code" src="{{../qrDataUrl}}" alt="QR Code" />{{/if}}
+      {{../restaurantName}}
+    </div>
   </div>
   {{/each}}
 
