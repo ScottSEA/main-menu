@@ -1,28 +1,46 @@
 <script setup>
-import { useAuthStore } from './stores/auth'
-import { useRouter } from 'vue-router'
+import { useAuthStore } from './stores/auth';
+import { useRouter } from 'vue-router';
 
-const auth = useAuthStore()
-const router = useRouter()
+const auth = useAuthStore();
+const router = useRouter();
 
 function handleLogout() {
-  auth.logout()
-  router.push('/')
+  auth.logout();
+  router.push('/');
 }
 </script>
 
 <template>
   <header class="app-header">
-    <router-link to="/" class="logo">🍽️ Main Menu</router-link>
+    <router-link
+      to="/"
+      class="logo"
+    >
+      🍽️ Main Menu
+    </router-link>
     <nav>
       <template v-if="auth.isAuthenticated">
-        <router-link to="/dashboard">Dashboard</router-link>
-        <router-link to="/subscription">Subscription</router-link>
-        <button @click="handleLogout" class="logout-btn">Logout</button>
+        <router-link to="/dashboard">
+          Dashboard
+        </router-link>
+        <router-link to="/subscription">
+          Subscription
+        </router-link>
+        <button
+          class="logout-btn"
+          @click="handleLogout"
+        >
+          Logout
+        </button>
       </template>
       <template v-else>
-        <router-link to="/login">Sign In</router-link>
-        <router-link to="/register">Register</router-link>
+        <router-link to="/login">
+          Sign In
+        </router-link>
+        <router-link to="/register">
+          Register
+        </router-link>
       </template>
     </nav>
   </header>

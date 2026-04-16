@@ -2,20 +2,46 @@
   <div class="home">
     <h1>🍽️ Main Menu</h1>
     <p>Beautiful digital menus for your restaurant — no designer needed.</p>
-    <div class="actions" v-if="!auth.isAuthenticated">
-      <router-link to="/register" class="btn btn-primary">Get Started</router-link>
-      <router-link to="/login" class="btn btn-secondary">Sign In</router-link>
+    <div
+      v-if="!auth.isAuthenticated"
+      class="actions"
+    >
+      <router-link
+        to="/register"
+        class="btn btn-primary"
+      >
+        Get Started
+      </router-link>
+      <router-link
+        to="/login"
+        class="btn btn-secondary"
+      >
+        Sign In
+      </router-link>
     </div>
-    <div class="actions" v-else>
-      <router-link to="/wizard" class="btn btn-primary">Get Started</router-link>
-      <router-link to="/dashboard" class="btn btn-secondary">Go to Dashboard</router-link>
+    <div
+      v-else
+      class="actions"
+    >
+      <router-link
+        to="/wizard"
+        class="btn btn-primary"
+      >
+        Get Started
+      </router-link>
+      <router-link
+        to="/dashboard"
+        class="btn btn-secondary"
+      >
+        Go to Dashboard
+      </router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useAuthStore } from '../stores/auth'
-const auth = useAuthStore()
+import { useAuthStore } from '../stores/auth';
+const auth = useAuthStore();
 </script>
 
 <style scoped>

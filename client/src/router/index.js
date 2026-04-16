@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
 const routes = [
   {
@@ -41,18 +41,18 @@ const routes = [
     component: () => import('../views/WizardView.vue'),
     meta: { requiresAuth: true },
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
+});
 
 router.beforeEach((to) => {
-  const auth = useAuthStore()
+  const auth = useAuthStore();
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return { name: 'Login' }
+    return { name: 'Login' };
   }
-})
+});
 
-export default router
+export default router;

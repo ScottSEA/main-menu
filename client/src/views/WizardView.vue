@@ -10,35 +10,72 @@
         class="progress-step"
         :class="{ active: step === s.num, done: step > s.num }"
       >
-        <div class="step-circle">{{ step > s.num ? '✓' : s.num }}</div>
+        <div class="step-circle">
+          {{ step > s.num ? '✓' : s.num }}
+        </div>
         <span class="step-label">{{ s.label }}</span>
       </div>
       <div class="progress-track">
-        <div class="progress-fill" :style="{ width: ((step - 1) / (steps.length - 1)) * 100 + '%' }"></div>
+        <div
+          class="progress-fill"
+          :style="{ width: ((step - 1) / (steps.length - 1)) * 100 + '%' }"
+        />
       </div>
     </div>
 
     <!-- Step 1: Restaurant Info -->
-    <div v-if="step === 1" class="step-content">
+    <div
+      v-if="step === 1"
+      class="step-content"
+    >
       <h3>Restaurant Info</h3>
       <label class="field-label">Restaurant Name</label>
-      <input v-model="restaurantName" placeholder="e.g. Joe's Diner" class="input" />
+      <input
+        v-model="restaurantName"
+        placeholder="e.g. Joe's Diner"
+        class="input"
+      >
 
       <label class="field-label">Menu Slug</label>
-      <input v-model="slug" placeholder="e.g. joes-diner" class="input" @input="onSlugInput" />
+      <input
+        v-model="slug"
+        placeholder="e.g. joes-diner"
+        class="input"
+        @input="onSlugInput"
+      >
       <div class="slug-preview">
         Your menu will be at: <strong>/menu/{{ slug || '...' }}</strong>
-        <span v-if="slugChecking" class="slug-status checking">Checking...</span>
-        <span v-else-if="slugAvailable === true" class="slug-status available">✓ Available</span>
-        <span v-else-if="slugAvailable === false" class="slug-status taken">✕ Taken</span>
+        <span
+          v-if="slugChecking"
+          class="slug-status checking"
+        >Checking...</span>
+        <span
+          v-else-if="slugAvailable === true"
+          class="slug-status available"
+        >✓ Available</span>
+        <span
+          v-else-if="slugAvailable === false"
+          class="slug-status taken"
+        >✕ Taken</span>
       </div>
     </div>
 
     <!-- Step 2: Choose Template -->
-    <div v-if="step === 2" class="step-content">
+    <div
+      v-if="step === 2"
+      class="step-content"
+    >
       <h3>Choose a Template</h3>
-      <div v-if="templatesLoading" class="loading">Loading templates...</div>
-      <div v-else class="template-grid">
+      <div
+        v-if="templatesLoading"
+        class="loading"
+      >
+        Loading templates...
+      </div>
+      <div
+        v-else
+        class="template-grid"
+      >
         <div
           v-for="t in templates"
           :key="t.id"
@@ -53,7 +90,10 @@
     </div>
 
     <!-- Step 3: Display Settings -->
-    <div v-if="step === 3" class="step-content">
+    <div
+      v-if="step === 3"
+      class="step-content"
+    >
       <h3>Display Settings</h3>
 
       <label class="field-label">Screen Size Preset</label>
@@ -65,103 +105,238 @@
           :class="{ selected: displayWidth === p.w && displayHeight === p.h }"
           @click="displayWidth = p.w; displayHeight = p.h"
         >
-          {{ p.label }}<br /><small>{{ p.w }}×{{ p.h }}</small>
+          {{ p.label }}<br><small>{{ p.w }}×{{ p.h }}</small>
         </button>
       </div>
 
       <div class="dimension-row">
         <div>
           <label class="field-label">Width (px)</label>
-          <input v-model.number="displayWidth" type="number" min="320" class="input input-sm" />
+          <input
+            v-model.number="displayWidth"
+            type="number"
+            min="320"
+            class="input input-sm"
+          >
         </div>
         <div>
           <label class="field-label">Height (px)</label>
-          <input v-model.number="displayHeight" type="number" min="240" class="input input-sm" />
+          <input
+            v-model.number="displayHeight"
+            type="number"
+            min="240"
+            class="input input-sm"
+          >
         </div>
       </div>
 
       <div class="color-row">
         <div>
           <label class="field-label">Background</label>
-          <input v-model="colorBg" type="color" class="color-picker" />
+          <input
+            v-model="colorBg"
+            type="color"
+            class="color-picker"
+          >
         </div>
         <div>
           <label class="field-label">Text</label>
-          <input v-model="colorText" type="color" class="color-picker" />
+          <input
+            v-model="colorText"
+            type="color"
+            class="color-picker"
+          >
         </div>
         <div>
           <label class="field-label">Accent</label>
-          <input v-model="colorAccent" type="color" class="color-picker" />
+          <input
+            v-model="colorAccent"
+            type="color"
+            class="color-picker"
+          >
         </div>
       </div>
     </div>
 
     <!-- Step 4: Add Menu Items -->
-    <div v-if="step === 4" class="step-content">
+    <div
+      v-if="step === 4"
+      class="step-content"
+    >
       <h3>Add Menu Items</h3>
 
-      <div v-for="(cat, ci) in categories" :key="ci" class="category-block">
+      <div
+        v-for="(cat, ci) in categories"
+        :key="ci"
+        class="category-block"
+      >
         <div class="category-header">
-          <input v-model="cat.name" class="input category-name-input" placeholder="Category name" />
-          <button v-if="categories.length > 1" @click="categories.splice(ci, 1)" class="btn-icon danger" title="Remove category">✕</button>
+          <input
+            v-model="cat.name"
+            class="input category-name-input"
+            placeholder="Category name"
+          >
+          <button
+            v-if="categories.length > 1"
+            class="btn-icon danger"
+            title="Remove category"
+            @click="categories.splice(ci, 1)"
+          >
+            ✕
+          </button>
         </div>
 
-        <div v-for="(item, ii) in cat.items" :key="ii" class="item-row">
-          <input v-model="item.name" placeholder="Item name" class="input input-sm" />
-          <input v-model="item.price" placeholder="Price" type="number" step="0.01" min="0" class="input input-xs" />
-          <input v-model="item.description" placeholder="Description (optional)" class="input input-sm" />
-          <button @click="cat.items.splice(ii, 1)" class="btn-icon danger" title="Remove item">✕</button>
+        <div
+          v-for="(item, ii) in cat.items"
+          :key="ii"
+          class="item-row"
+        >
+          <input
+            v-model="item.name"
+            placeholder="Item name"
+            class="input input-sm"
+          >
+          <input
+            v-model="item.price"
+            placeholder="Price"
+            type="number"
+            step="0.01"
+            min="0"
+            class="input input-xs"
+          >
+          <input
+            v-model="item.description"
+            placeholder="Description (optional)"
+            class="input input-sm"
+          >
+          <button
+            class="btn-icon danger"
+            title="Remove item"
+            @click="cat.items.splice(ii, 1)"
+          >
+            ✕
+          </button>
         </div>
 
-        <button @click="cat.items.push({ name: '', price: '', description: '' })" class="btn btn-small">+ Add Item</button>
+        <button
+          class="btn btn-small"
+          @click="cat.items.push({ name: '', price: '', description: '' })"
+        >
+          + Add Item
+        </button>
       </div>
 
-      <button @click="categories.push({ name: '', items: [{ name: '', price: '', description: '' }] })" class="btn btn-small add-category-btn">+ Add Category</button>
+      <button
+        class="btn btn-small add-category-btn"
+        @click="categories.push({ name: '', items: [{ name: '', price: '', description: '' }] })"
+      >
+        + Add Category
+      </button>
     </div>
 
     <!-- Step 5: Review & Publish -->
-    <div v-if="step === 5" class="step-content">
+    <div
+      v-if="step === 5"
+      class="step-content"
+    >
       <h3>Review &amp; Publish</h3>
 
-      <div v-if="!published" class="review-card">
-        <div class="review-row"><span>Restaurant:</span><strong>{{ restaurantName }}</strong></div>
-        <div class="review-row"><span>Slug:</span><strong>/menu/{{ slug }}</strong></div>
-        <div class="review-row"><span>Template:</span><strong>{{ selectedTemplateName }}</strong></div>
-        <div class="review-row"><span>Dimensions:</span><strong>{{ displayWidth }}×{{ displayHeight }}</strong></div>
-        <div class="review-row"><span>Categories:</span><strong>{{ categories.length }}</strong></div>
-        <div class="review-row"><span>Items:</span><strong>{{ totalItems }}</strong></div>
+      <div
+        v-if="!published"
+        class="review-card"
+      >
+        <div class="review-row">
+          <span>Restaurant:</span><strong>{{ restaurantName }}</strong>
+        </div>
+        <div class="review-row">
+          <span>Slug:</span><strong>/menu/{{ slug }}</strong>
+        </div>
+        <div class="review-row">
+          <span>Template:</span><strong>{{ selectedTemplateName }}</strong>
+        </div>
+        <div class="review-row">
+          <span>Dimensions:</span><strong>{{ displayWidth }}×{{ displayHeight }}</strong>
+        </div>
+        <div class="review-row">
+          <span>Categories:</span><strong>{{ categories.length }}</strong>
+        </div>
+        <div class="review-row">
+          <span>Items:</span><strong>{{ totalItems }}</strong>
+        </div>
 
-        <button @click="publish" class="btn btn-primary btn-publish" :disabled="publishing">
+        <button
+          class="btn btn-primary btn-publish"
+          :disabled="publishing"
+          @click="publish"
+        >
           {{ publishing ? 'Publishing...' : '🚀 Publish Menu' }}
         </button>
-        <p v-if="publishError" class="error">{{ publishError }}</p>
+        <p
+          v-if="publishError"
+          class="error"
+        >
+          {{ publishError }}
+        </p>
       </div>
 
-      <div v-else class="success-card">
+      <div
+        v-else
+        class="success-card"
+      >
         <h4>🎉 Menu Published!</h4>
         <p>Your menu is live at:</p>
-        <a :href="`/menu/${slug}`" class="menu-link" target="_blank">/menu/{{ slug }}</a>
+        <a
+          :href="`/menu/${slug}`"
+          class="menu-link"
+          target="_blank"
+        >/menu/{{ slug }}</a>
         <div class="success-actions">
-          <router-link :to="`/editor/${createdMenuId}`" class="btn btn-primary">Open Editor</router-link>
-          <router-link to="/dashboard" class="btn btn-secondary">Go to Dashboard</router-link>
+          <router-link
+            :to="`/editor/${createdMenuId}`"
+            class="btn btn-primary"
+          >
+            Open Editor
+          </router-link>
+          <router-link
+            to="/dashboard"
+            class="btn btn-secondary"
+          >
+            Go to Dashboard
+          </router-link>
         </div>
       </div>
     </div>
 
     <!-- Navigation -->
-    <div v-if="!(step === 5 && published)" class="nav-buttons">
-      <button @click="step--" class="btn btn-secondary" :disabled="step === 1">← Back</button>
-      <button v-if="step < 5" @click="step++" class="btn btn-primary" :disabled="!canAdvance">Next →</button>
+    <div
+      v-if="!(step === 5 && published)"
+      class="nav-buttons"
+    >
+      <button
+        class="btn btn-secondary"
+        :disabled="step === 1"
+        @click="step--"
+      >
+        ← Back
+      </button>
+      <button
+        v-if="step < 5"
+        class="btn btn-primary"
+        :disabled="!canAdvance"
+        @click="step++"
+      >
+        Next →
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
-const router = useRouter()
+const router = useRouter();
 
 const steps = [
   { num: 1, label: 'Restaurant' },
@@ -169,61 +344,61 @@ const steps = [
   { num: 3, label: 'Settings' },
   { num: 4, label: 'Items' },
   { num: 5, label: 'Publish' },
-]
+];
 
-const step = ref(1)
+const step = ref(1);
 
 // Step 1
-const restaurantName = ref('')
-const slug = ref('')
-const slugManuallyEdited = ref(false)
-const slugAvailable = ref(null)
-const slugChecking = ref(false)
-let slugTimer = null
+const restaurantName = ref('');
+const slug = ref('');
+const slugManuallyEdited = ref(false);
+const slugAvailable = ref(null);
+const slugChecking = ref(false);
+let slugTimer = null;
 
 watch(restaurantName, (val) => {
   if (!slugManuallyEdited.value) {
-    slug.value = val.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, '-').replace(/^-|-$/g, '')
+    slug.value = val.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, '-').replace(/^-|-$/g, '');
   }
-})
+});
 
 watch(slug, (val) => {
-  if (val.length < 3) { slugAvailable.value = null; return }
-  slugChecking.value = true
-  clearTimeout(slugTimer)
+  if (val.length < 3) { slugAvailable.value = null; return; }
+  slugChecking.value = true;
+  clearTimeout(slugTimer);
   slugTimer = setTimeout(async () => {
     try {
-      const res = await axios.get(`/api/menus/restaurants/check-slug/${val}`)
-      slugAvailable.value = res.data.available
-    } catch { slugAvailable.value = null }
-    slugChecking.value = false
-  }, 400)
-})
+      const res = await axios.get(`/api/menus/restaurants/check-slug/${val}`);
+      slugAvailable.value = res.data.available;
+    } catch { slugAvailable.value = null; }
+    slugChecking.value = false;
+  }, 400);
+});
 
 function onSlugInput() {
-  slugManuallyEdited.value = true
-  slug.value = slug.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+  slugManuallyEdited.value = true;
+  slug.value = slug.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
 }
 
 // Step 2
-const templates = ref([])
-const templatesLoading = ref(false)
-const selectedTemplate = ref(null)
+const templates = ref([]);
+const templatesLoading = ref(false);
+const selectedTemplate = ref(null);
 
 const selectedTemplateName = computed(() => {
-  const t = templates.value.find(t => t.id === selectedTemplate.value)
-  return t ? t.name : '—'
-})
+  const t = templates.value.find(t => t.id === selectedTemplate.value);
+  return t ? t.name : '—';
+});
 
 onMounted(async () => {
-  templatesLoading.value = true
+  templatesLoading.value = true;
   try {
-    const res = await axios.get('/api/templates')
-    templates.value = res.data
-    if (res.data.length) selectedTemplate.value = res.data[0].id
+    const res = await axios.get('/api/templates');
+    templates.value = res.data;
+    if (res.data.length) selectedTemplate.value = res.data[0].id;
   } catch { /* templates will stay empty */ }
-  templatesLoading.value = false
-})
+  templatesLoading.value = false;
+});
 
 // Step 3
 const presets = [
@@ -231,47 +406,47 @@ const presets = [
   { label: 'HD', w: 1280, h: 720 },
   { label: '4K', w: 3840, h: 2160 },
   { label: 'Portrait', w: 1080, h: 1920 },
-]
-const displayWidth = ref(1920)
-const displayHeight = ref(1080)
-const colorBg = ref('#111827')
-const colorText = ref('#e5e7eb')
-const colorAccent = ref('#2563eb')
+];
+const displayWidth = ref(1920);
+const displayHeight = ref(1080);
+const colorBg = ref('#111827');
+const colorText = ref('#e5e7eb');
+const colorAccent = ref('#2563eb');
 
 // Step 4
 const categories = ref([
   { name: 'Main Menu', items: [{ name: '', price: '', description: '' }] },
-])
+]);
 
 const totalItems = computed(() =>
   categories.value.reduce((sum, c) => sum + c.items.filter(i => i.name).length, 0)
-)
+);
 
 // Step 5
-const publishing = ref(false)
-const published = ref(false)
-const publishError = ref('')
-const createdMenuId = ref(null)
+const publishing = ref(false);
+const published = ref(false);
+const publishError = ref('');
+const createdMenuId = ref(null);
 
 // Validation
 const canAdvance = computed(() => {
-  if (step.value === 1) return restaurantName.value.trim() && slug.value.length >= 3 && slugAvailable.value === true && !slugChecking.value
-  if (step.value === 2) return !!selectedTemplate.value
-  if (step.value === 3) return displayWidth.value > 0 && displayHeight.value > 0
-  if (step.value === 4) return categories.value.some(c => c.name && c.items.some(i => i.name))
-  return true
-})
+  if (step.value === 1) return restaurantName.value.trim() && slug.value.length >= 3 && slugAvailable.value === true && !slugChecking.value;
+  if (step.value === 2) return !!selectedTemplate.value;
+  if (step.value === 3) return displayWidth.value > 0 && displayHeight.value > 0;
+  if (step.value === 4) return categories.value.some(c => c.name && c.items.some(i => i.name));
+  return true;
+});
 
 async function publish() {
-  publishing.value = true
-  publishError.value = ''
+  publishing.value = true;
+  publishError.value = '';
   try {
     // 1. Create restaurant
     const rRes = await axios.post('/api/menus/restaurants', {
       name: restaurantName.value,
       slug: slug.value,
-    })
-    const restaurantId = rRes.data.id
+    });
+    const restaurantId = rRes.data.id;
 
     // 2. Create menu
     const mRes = await axios.post(`/api/menus/restaurants/${restaurantId}/menus`, {
@@ -279,9 +454,9 @@ async function publish() {
       template_id: selectedTemplate.value,
       width_px: displayWidth.value,
       height_px: displayHeight.value,
-    })
-    const menuId = mRes.data.id
-    createdMenuId.value = menuId
+    });
+    const menuId = mRes.data.id;
+    createdMenuId.value = menuId;
 
     // 3. Save display settings
     await axios.put(`/api/menus/menus/${menuId}`, {
@@ -290,41 +465,41 @@ async function publish() {
         textColor: colorText.value,
         accentColor: colorAccent.value,
       }),
-    })
+    });
 
     // 4. Get menu to find default page
-    const menuData = await axios.get(`/api/menus/menus/${menuId}`)
-    const pageId = menuData.data.pages?.[0]?.id
+    const menuData = await axios.get(`/api/menus/menus/${menuId}`);
+    const pageId = menuData.data.pages?.[0]?.id;
 
     if (pageId) {
       // 5. Create categories and items
       for (const cat of categories.value) {
-        if (!cat.name) continue
+        if (!cat.name) continue;
         const cRes = await axios.post(`/api/menus/pages/${pageId}/categories`, {
           name: cat.name,
-        })
-        const categoryId = cRes.data.id
+        });
+        const categoryId = cRes.data.id;
 
         for (const item of cat.items) {
-          if (!item.name) continue
+          if (!item.name) continue;
           await axios.post(`/api/menus/categories/${categoryId}/items`, {
             name: item.name,
             price_cents: Math.round((parseFloat(item.price) || 0) * 100),
             description: item.description || '',
             dietary_tags: '',
             is_special: false,
-          })
+          });
         }
       }
     }
 
     // 6. Publish
-    await axios.post(`/api/publish/${menuId}`)
-    published.value = true
+    await axios.post(`/api/publish/${menuId}`);
+    published.value = true;
   } catch (err) {
-    publishError.value = err.response?.data?.error || 'Publishing failed. Please try again.'
+    publishError.value = err.response?.data?.error || 'Publishing failed. Please try again.';
   }
-  publishing.value = false
+  publishing.value = false;
 }
 </script>
 

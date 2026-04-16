@@ -1,96 +1,106 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 
-const subscription = ref({ plan: 'free', status: 'active' })
-const plans = ref({})
-const loading = ref(true)
-const error = ref('')
-const checkoutLoading = ref('')
-const portalLoading = ref(false)
-const stripeNotConfigured = ref(false)
+const subscription = ref({ plan: 'free', status: 'active' });
+const plans = ref({});
+const loading = ref(true);
+const error = ref('');
+const checkoutLoading = ref('');
+const portalLoading = ref(false);
+const stripeNotConfigured = ref(false);
 
-const planOrder = ['starter', 'pro', 'business']
+const planOrder = ['starter', 'pro', 'business'];
 
 const currentPlanIndex = computed(() => {
-  const plan = subscription.value?.plan
-  if (!plan || plan === 'free') return -1
-  return planOrder.indexOf(plan)
-})
+  const plan = subscription.value?.plan;
+  if (!plan || plan === 'free') return -1;
+  return planOrder.indexOf(plan);
+});
 
 function formatPrice(cents) {
-  return `$${(cents / 100).toFixed(2)}`
+  return `$${(cents / 100).toFixed(2)}`;
 }
 
 function statusLabel(status) {
-  const labels = { active: 'Active', inactive: 'Inactive', cancelled: 'Cancelled', past_due: 'Past Due' }
-  return labels[status] || status
+  const labels = { active: 'Active', inactive: 'Inactive', cancelled: 'Cancelled', past_due: 'Past Due' };
+  return labels[status] || status;
 }
 
 function statusClass(status) {
-  if (status === 'active') return 'badge-success'
-  if (status === 'cancelled') return 'badge-danger'
-  return 'badge-warning'
+  if (status === 'active') return 'badge-success';
+  if (status === 'cancelled') return 'badge-danger';
+  return 'badge-warning';
 }
 
 async function loadStatus() {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = '';
   try {
-    const res = await axios.get('/api/stripe/status')
-    subscription.value = res.data.subscription
-    plans.value = res.data.plans
+    const res = await axios.get('/api/stripe/status');
+    subscription.value = res.data.subscription;
+    plans.value = res.data.plans;
   } catch (err) {
-    error.value = err.response?.data?.error || 'Failed to load subscription status'
+    error.value = err.response?.data?.error || 'Failed to load subscription status';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function startCheckout(planKey) {
-  checkoutLoading.value = planKey
-  error.value = ''
+  checkoutLoading.value = planKey;
+  error.value = '';
   try {
-    const res = await axios.post('/api/stripe/checkout', { plan: planKey })
-    window.location.href = res.data.url
+    const res = await axios.post('/api/stripe/checkout', { plan: planKey });
+    window.location.href = res.data.url;
   } catch (err) {
     if (err.response?.status === 503) {
-      stripeNotConfigured.value = true
+      stripeNotConfigured.value = true;
     }
-    error.value = err.response?.data?.error || 'Failed to start checkout'
-    checkoutLoading.value = ''
+    error.value = err.response?.data?.error || 'Failed to start checkout';
+    checkoutLoading.value = '';
   }
 }
 
 async function openPortal() {
-  portalLoading.value = true
-  error.value = ''
+  portalLoading.value = true;
+  error.value = '';
   try {
-    const res = await axios.post('/api/stripe/portal')
-    window.location.href = res.data.url
+    const res = await axios.post('/api/stripe/portal');
+    window.location.href = res.data.url;
   } catch (err) {
     if (err.response?.status === 503) {
-      stripeNotConfigured.value = true
+      stripeNotConfigured.value = true;
     }
-    error.value = err.response?.data?.error || 'Failed to open billing portal'
-    portalLoading.value = false
+    error.value = err.response?.data?.error || 'Failed to open billing portal';
+    portalLoading.value = false;
   }
 }
 
-onMounted(loadStatus)
+onMounted(loadStatus);
 </script>
 
 <template>
   <div class="subscription-page">
     <h2>Subscription</h2>
 
-    <div v-if="loading" class="loading">Loading subscription info…</div>
+    <div
+      v-if="loading"
+      class="loading"
+    >
+      Loading subscription info…
+    </div>
 
     <template v-else>
       <!-- Stripe not configured notice -->
-      <div v-if="stripeNotConfigured" class="notice">
+      <div
+        v-if="stripeNotConfigured"
+        class="notice"
+      >
         <p>⚠️ Stripe is not configured on this server. Subscription management is unavailable.</p>
-        <p class="muted">Ask the administrator to add <code>STRIPE_SECRET_KEY</code> to the server environment.</p>
+        <p class="muted">
+          Ask the administrator to add <code>STRIPE_SECRET_KEY</code> to the server environment.
+        </p>
       </div>
 
       <!-- Current plan banner -->
@@ -99,20 +109,35 @@ onMounted(loadStatus)
           <span class="plan-label">Current Plan</span>
           <span class="plan-name">{{ subscription.plan === 'free' ? 'Free' : plans[subscription.plan]?.name || subscription.plan }}</span>
         </div>
-        <span class="badge" :class="statusClass(subscription.status)">
+        <span
+          class="badge"
+          :class="statusClass(subscription.status)"
+        >
           {{ statusLabel(subscription.status) }}
         </span>
       </div>
 
       <!-- Manage subscription button -->
-      <div v-if="subscription.plan !== 'free'" class="portal-section">
-        <button class="btn btn-outline" :disabled="portalLoading" @click="openPortal">
+      <div
+        v-if="subscription.plan !== 'free'"
+        class="portal-section"
+      >
+        <button
+          class="btn btn-outline"
+          :disabled="portalLoading"
+          @click="openPortal"
+        >
           {{ portalLoading ? 'Opening…' : 'Manage Subscription' }}
         </button>
       </div>
 
       <!-- Error message -->
-      <p v-if="error" class="error">{{ error }}</p>
+      <p
+        v-if="error"
+        class="error"
+      >
+        {{ error }}
+      </p>
 
       <!-- Plan cards -->
       <div class="plans-grid">
@@ -122,18 +147,33 @@ onMounted(loadStatus)
           class="plan-card"
           :class="{ 'plan-current': subscription.plan === key }"
         >
-          <div v-if="subscription.plan === key" class="current-badge">Current Plan</div>
+          <div
+            v-if="subscription.plan === key"
+            class="current-badge"
+          >
+            Current Plan
+          </div>
           <h3>{{ plans[key]?.name }}</h3>
           <div class="price">
             <span class="amount">{{ formatPrice(plans[key]?.price_monthly || 0) }}</span>
             <span class="period">/month</span>
           </div>
           <ul class="features">
-            <li v-for="feat in plans[key]?.features" :key="feat">{{ feat }}</li>
+            <li
+              v-for="feat in plans[key]?.features"
+              :key="feat"
+            >
+              {{ feat }}
+            </li>
           </ul>
           <div class="plan-action">
             <template v-if="subscription.plan === key">
-              <button class="btn btn-current" disabled>Your Plan</button>
+              <button
+                class="btn btn-current"
+                disabled
+              >
+                Your Plan
+              </button>
             </template>
             <template v-else-if="idx > currentPlanIndex">
               <button

@@ -6,45 +6,117 @@
     <section class="restaurants">
       <div class="section-header">
         <h3>Your Restaurants</h3>
-        <router-link to="/wizard" class="btn btn-small btn-primary">✨ Create New Menu</router-link>
-        <button @click="showNewRestaurant = true" class="btn btn-small">+ Add Restaurant</button>
+        <router-link
+          to="/wizard"
+          class="btn btn-small btn-primary"
+        >
+          ✨ Create New Menu
+        </router-link>
+        <button
+          class="btn btn-small"
+          @click="showNewRestaurant = true"
+        >
+          + Add Restaurant
+        </button>
       </div>
 
-      <div v-if="showNewRestaurant" class="new-form">
-        <input v-model="newName" placeholder="Restaurant name" />
+      <div
+        v-if="showNewRestaurant"
+        class="new-form"
+      >
+        <input
+          v-model="newName"
+          placeholder="Restaurant name"
+        >
         <div class="slug-field">
           <label>Your menu will be at: <strong>/menu/{{ newSlug || '...' }}</strong></label>
-          <input v-model="newSlug" placeholder="e.g. joes-diner" @input="sanitizeSlug" />
-          <span v-if="slugChecking" class="slug-status checking">Checking...</span>
-          <span v-else-if="slugAvailable === true" class="slug-status available">✓ Available</span>
-          <span v-else-if="slugAvailable === false" class="slug-status taken">✕ Already taken</span>
+          <input
+            v-model="newSlug"
+            placeholder="e.g. joes-diner"
+            @input="sanitizeSlug"
+          >
+          <span
+            v-if="slugChecking"
+            class="slug-status checking"
+          >Checking...</span>
+          <span
+            v-else-if="slugAvailable === true"
+            class="slug-status available"
+          >✓ Available</span>
+          <span
+            v-else-if="slugAvailable === false"
+            class="slug-status taken"
+          >✕ Already taken</span>
         </div>
         <div class="form-actions">
-          <button @click="createRestaurant" class="btn btn-primary btn-small" :disabled="!newName || !newSlug || slugAvailable === false || slugChecking">Create</button>
-          <button @click="showNewRestaurant = false" class="btn btn-small">Cancel</button>
+          <button
+            class="btn btn-primary btn-small"
+            :disabled="!newName || !newSlug || slugAvailable === false || slugChecking"
+            @click="createRestaurant"
+          >
+            Create
+          </button>
+          <button
+            class="btn btn-small"
+            @click="showNewRestaurant = false"
+          >
+            Cancel
+          </button>
         </div>
-        <p v-if="createError" class="error">{{ createError }}</p>
+        <p
+          v-if="createError"
+          class="error"
+        >
+          {{ createError }}
+        </p>
       </div>
 
-      <div v-if="restaurants.length === 0 && !showNewRestaurant" class="empty">
+      <div
+        v-if="restaurants.length === 0 && !showNewRestaurant"
+        class="empty"
+      >
         No restaurants yet. Add one to get started!
       </div>
 
-      <div v-for="r in restaurants" :key="r.id" class="restaurant-card">
+      <div
+        v-for="r in restaurants"
+        :key="r.id"
+        class="restaurant-card"
+      >
         <div class="restaurant-header">
           <div>
             <h4>{{ r.name }}</h4>
             <span class="slug">/menu/{{ r.slug }}</span>
           </div>
-          <button @click="createMenu(r)" class="btn btn-small">+ New Menu</button>
+          <button
+            class="btn btn-small"
+            @click="createMenu(r)"
+          >
+            + New Menu
+          </button>
         </div>
-        <div v-if="r.menus && r.menus.length" class="menu-list">
-          <div v-for="m in r.menus" :key="m.id" class="menu-card">
+        <div
+          v-if="r.menus && r.menus.length"
+          class="menu-list"
+        >
+          <div
+            v-for="m in r.menus"
+            :key="m.id"
+            class="menu-card"
+          >
             <div>
               <strong>{{ m.name }}</strong>
-              <span class="menu-status" :class="m.status">{{ m.status }}</span>
+              <span
+                class="menu-status"
+                :class="m.status"
+              >{{ m.status }}</span>
             </div>
-            <router-link :to="`/editor/${m.id}`" class="btn btn-small btn-primary">Edit</router-link>
+            <router-link
+              :to="`/editor/${m.id}`"
+              class="btn btn-small btn-primary"
+            >
+              Edit
+            </router-link>
           </div>
         </div>
       </div>
@@ -53,74 +125,74 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '../stores/auth'
+import { ref, watch, onMounted } from 'vue';
+import axios from 'axios';
+import { useAuthStore } from '../stores/auth';
 
-const auth = useAuthStore()
-const restaurants = ref([])
-const showNewRestaurant = ref(false)
-const newName = ref('')
-const newSlug = ref('')
-const slugManuallyEdited = ref(false)
-const slugAvailable = ref(null)
-const slugChecking = ref(false)
-const createError = ref('')
-let slugCheckTimer = null
+const auth = useAuthStore();
+const restaurants = ref([]);
+const showNewRestaurant = ref(false);
+const newName = ref('');
+const newSlug = ref('');
+const slugManuallyEdited = ref(false);
+const slugAvailable = ref(null);
+const slugChecking = ref(false);
+const createError = ref('');
+let slugCheckTimer = null;
 
 // Auto-generate slug from name unless user manually edited it
 watch(newName, (val) => {
   if (!slugManuallyEdited.value) {
-    newSlug.value = val.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, '-').replace(/^-|-$/g, '')
+    newSlug.value = val.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, '-').replace(/^-|-$/g, '');
   }
-})
+});
 
 watch(newSlug, (val) => {
   if (val.length < 3) {
-    slugAvailable.value = null
-    return
+    slugAvailable.value = null;
+    return;
   }
-  slugChecking.value = true
-  clearTimeout(slugCheckTimer)
+  slugChecking.value = true;
+  clearTimeout(slugCheckTimer);
   slugCheckTimer = setTimeout(async () => {
     try {
-      const res = await axios.get(`/api/menus/restaurants/check-slug/${val}`)
-      slugAvailable.value = res.data.available
-    } catch { slugAvailable.value = null }
-    slugChecking.value = false
-  }, 400)
-})
+      const res = await axios.get(`/api/menus/restaurants/check-slug/${val}`);
+      slugAvailable.value = res.data.available;
+    } catch { slugAvailable.value = null; }
+    slugChecking.value = false;
+  }, 400);
+});
 
 function sanitizeSlug() {
-  slugManuallyEdited.value = true
-  newSlug.value = newSlug.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+  slugManuallyEdited.value = true;
+  newSlug.value = newSlug.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
 }
 
 async function loadRestaurants() {
-  const res = await axios.get('/api/menus/restaurants')
+  const res = await axios.get('/api/menus/restaurants');
   // Load menus for each restaurant
   for (const r of res.data) {
-    const menusRes = await axios.get(`/api/menus/restaurants/${r.id}/menus`)
-    r.menus = menusRes.data
+    const menusRes = await axios.get(`/api/menus/restaurants/${r.id}/menus`);
+    r.menus = menusRes.data;
   }
-  restaurants.value = res.data
+  restaurants.value = res.data;
 }
 
 async function createRestaurant() {
-  createError.value = ''
+  createError.value = '';
   try {
     await axios.post('/api/menus/restaurants', {
       name: newName.value,
       slug: newSlug.value,
-    })
-    newName.value = ''
-    newSlug.value = ''
-    slugManuallyEdited.value = false
-    slugAvailable.value = null
-    showNewRestaurant.value = false
-    await loadRestaurants()
+    });
+    newName.value = '';
+    newSlug.value = '';
+    slugManuallyEdited.value = false;
+    slugAvailable.value = null;
+    showNewRestaurant.value = false;
+    await loadRestaurants();
   } catch (err) {
-    createError.value = err.response?.data?.error || 'Failed to create restaurant'
+    createError.value = err.response?.data?.error || 'Failed to create restaurant';
   }
 }
 
@@ -129,14 +201,14 @@ async function createMenu(restaurant) {
     const res = await axios.post(`/api/menus/restaurants/${restaurant.id}/menus`, {
       name: 'Main Menu',
       template_id: 'classic',
-    })
-    await loadRestaurants()
+    });
+    await loadRestaurants();
   } catch (err) {
-    alert(err.response?.data?.error || 'Failed to create menu')
+    alert(err.response?.data?.error || 'Failed to create menu');
   }
 }
 
-onMounted(loadRestaurants)
+onMounted(loadRestaurants);
 </script>
 
 <style scoped>

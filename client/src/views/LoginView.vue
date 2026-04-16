@@ -4,45 +4,66 @@
     <form @submit.prevent="handleLogin">
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" v-model="email" type="email" required />
+        <input
+          id="email"
+          v-model="email"
+          type="email"
+          required
+        >
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input id="password" v-model="password" type="password" required />
+        <input
+          id="password"
+          v-model="password"
+          type="password"
+          required
+        >
       </div>
-      <p v-if="error" class="error">{{ error }}</p>
-      <button type="submit" class="btn btn-primary" :disabled="loading">
+      <p
+        v-if="error"
+        class="error"
+      >
+        {{ error }}
+      </p>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        :disabled="loading"
+      >
         {{ loading ? 'Signing in...' : 'Sign In' }}
       </button>
     </form>
     <p class="switch">
-      Don't have an account? <router-link to="/register">Register</router-link>
+      Don't have an account? <router-link to="/register">
+        Register
+      </router-link>
     </p>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
-const auth = useAuthStore()
-const router = useRouter()
-const email = ref('')
-const password = ref('')
-const error = ref('')
-const loading = ref(false)
+const auth = useAuthStore();
+const router = useRouter();
+const email = ref('');
+const password = ref('');
+const error = ref('');
+const loading = ref(false);
 
 async function handleLogin() {
-  error.value = ''
-  loading.value = true
+  error.value = '';
+  loading.value = true;
   try {
-    await auth.login(email.value, password.value)
-    router.push('/dashboard')
+    await auth.login(email.value, password.value);
+    router.push('/dashboard');
   } catch (err) {
-    error.value = err.response?.data?.error || 'Login failed'
+    error.value = err.response?.data?.error || 'Login failed';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>

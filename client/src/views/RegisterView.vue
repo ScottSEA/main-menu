@@ -4,57 +4,84 @@
     <form @submit.prevent="handleRegister">
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" v-model="email" type="email" required />
+        <input
+          id="email"
+          v-model="email"
+          type="email"
+          required
+        >
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input id="password" v-model="password" type="password" required minlength="8" />
+        <input
+          id="password"
+          v-model="password"
+          type="password"
+          required
+          minlength="8"
+        >
         <small>Minimum 8 characters</small>
       </div>
       <div class="field">
         <label for="confirm">Confirm Password</label>
-        <input id="confirm" v-model="confirmPassword" type="password" required />
+        <input
+          id="confirm"
+          v-model="confirmPassword"
+          type="password"
+          required
+        >
       </div>
-      <p v-if="error" class="error">{{ error }}</p>
-      <button type="submit" class="btn btn-primary" :disabled="loading">
+      <p
+        v-if="error"
+        class="error"
+      >
+        {{ error }}
+      </p>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        :disabled="loading"
+      >
         {{ loading ? 'Creating account...' : 'Create Account' }}
       </button>
     </form>
     <p class="switch">
-      Already have an account? <router-link to="/login">Sign In</router-link>
+      Already have an account? <router-link to="/login">
+        Sign In
+      </router-link>
     </p>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
-const auth = useAuthStore()
-const router = useRouter()
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const error = ref('')
-const loading = ref(false)
+const auth = useAuthStore();
+const router = useRouter();
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const error = ref('');
+const loading = ref(false);
 
 async function handleRegister() {
-  error.value = ''
+  error.value = '';
 
   if (password.value !== confirmPassword.value) {
-    error.value = 'Passwords do not match'
-    return
+    error.value = 'Passwords do not match';
+    return;
   }
 
-  loading.value = true
+  loading.value = true;
   try {
-    await auth.register(email.value, password.value)
-    router.push('/dashboard')
+    await auth.register(email.value, password.value);
+    router.push('/dashboard');
   } catch (err) {
-    error.value = err.response?.data?.error || 'Registration failed'
+    error.value = err.response?.data?.error || 'Registration failed';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>

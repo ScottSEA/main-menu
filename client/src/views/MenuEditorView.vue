@@ -2,21 +2,38 @@
   <div class="editor">
     <div class="editor-sidebar">
       <div class="sidebar-header">
-        <router-link to="/dashboard" class="back">← Back</router-link>
+        <router-link
+          to="/dashboard"
+          class="back"
+        >
+          ← Back
+        </router-link>
         <h2>{{ menu?.name || 'Loading...' }}</h2>
       </div>
 
-      <div v-if="menu" class="editor-content">
+      <div
+        v-if="menu"
+        class="editor-content"
+      >
         <!-- Restaurant Branding -->
         <section class="panel">
           <h3>🏪 Branding</h3>
           <div class="field">
             <label>Restaurant Logo</label>
             <div class="image-upload">
-              <img v-if="restaurantLogo" :src="restaurantLogo" class="logo-preview" />
+              <img
+                v-if="restaurantLogo"
+                :src="restaurantLogo"
+                class="logo-preview"
+              >
               <label class="upload-btn">
                 {{ restaurantLogo ? 'Change Logo' : 'Upload Logo' }}
-                <input type="file" accept="image/*" @change="uploadLogo" hidden />
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  @change="uploadLogo"
+                >
               </label>
             </div>
           </div>
@@ -28,17 +45,34 @@
           <div class="field-row">
             <div class="field">
               <label>Width (px)</label>
-              <input v-model.number="menu.width_px" type="number" @change="saveSettings" />
+              <input
+                v-model.number="menu.width_px"
+                type="number"
+                @change="saveSettings"
+              >
             </div>
             <div class="field">
               <label>Height (px)</label>
-              <input v-model.number="menu.height_px" type="number" @change="saveSettings" />
+              <input
+                v-model.number="menu.height_px"
+                type="number"
+                @change="saveSettings"
+              >
             </div>
           </div>
           <div class="field">
             <label>Template</label>
-            <select v-model="menu.template_id" @change="saveSettings">
-              <option v-for="t in templates" :key="t.id" :value="t.id">{{ t.name }}</option>
+            <select
+              v-model="menu.template_id"
+              @change="saveSettings"
+            >
+              <option
+                v-for="t in templates"
+                :key="t.id"
+                :value="t.id"
+              >
+                {{ t.name }}
+              </option>
             </select>
           </div>
         </section>
@@ -49,25 +83,50 @@
           <div class="field-row">
             <div class="field">
               <label>Background</label>
-              <input v-model="settings.backgroundColor" type="color" @change="saveSettings" />
+              <input
+                v-model="settings.backgroundColor"
+                type="color"
+                @change="saveSettings"
+              >
             </div>
             <div class="field">
               <label>Text</label>
-              <input v-model="settings.textColor" type="color" @change="saveSettings" />
+              <input
+                v-model="settings.textColor"
+                type="color"
+                @change="saveSettings"
+              >
             </div>
             <div class="field">
               <label>Accent</label>
-              <input v-model="settings.accentColor" type="color" @change="saveSettings" />
+              <input
+                v-model="settings.accentColor"
+                type="color"
+                @change="saveSettings"
+              >
             </div>
           </div>
           <div class="field">
             <label>Font</label>
-            <select v-model="settings.fontFamily" @change="saveSettings">
-              <option value="'Georgia', 'Times New Roman', serif">Georgia (Serif)</option>
-              <option value="'Helvetica Neue', Arial, sans-serif">Helvetica (Sans)</option>
-              <option value="'Palatino', 'Book Antiqua', serif">Palatino (Elegant)</option>
-              <option value="'Trebuchet MS', sans-serif">Trebuchet (Modern)</option>
-              <option value="'Courier New', monospace">Courier (Monospace)</option>
+            <select
+              v-model="settings.fontFamily"
+              @change="saveSettings"
+            >
+              <option value="'Georgia', 'Times New Roman', serif">
+                Georgia (Serif)
+              </option>
+              <option value="'Helvetica Neue', Arial, sans-serif">
+                Helvetica (Sans)
+              </option>
+              <option value="'Palatino', 'Book Antiqua', serif">
+                Palatino (Elegant)
+              </option>
+              <option value="'Trebuchet MS', sans-serif">
+                Trebuchet (Modern)
+              </option>
+              <option value="'Courier New', monospace">
+                Courier (Monospace)
+              </option>
             </select>
           </div>
         </section>
@@ -77,40 +136,111 @@
           <h3>📱 QR Code</h3>
           <div class="field">
             <label>Link URL (ordering, website, etc.)</label>
-            <input v-model="settings.qrUrl" placeholder="https://your-restaurant.com" @change="saveSettings" />
+            <input
+              v-model="settings.qrUrl"
+              placeholder="https://your-restaurant.com"
+              @change="saveSettings"
+            >
           </div>
-          <div v-if="settings.qrUrl" class="qr-preview-wrapper">
-            <img v-if="qrDataUrl" :src="qrDataUrl" class="qr-preview" />
-            <button @click="generateQr" class="btn btn-small">Regenerate QR</button>
+          <div
+            v-if="settings.qrUrl"
+            class="qr-preview-wrapper"
+          >
+            <img
+              v-if="qrDataUrl"
+              :src="qrDataUrl"
+              class="qr-preview"
+            >
+            <button
+              class="btn btn-small"
+              @click="generateQr"
+            >
+              Regenerate QR
+            </button>
           </div>
         </section>
 
         <!-- Pages & Categories -->
-        <section class="panel" v-for="page in pages" :key="page.id">
+        <section
+          v-for="page in pages"
+          :key="page.id"
+          class="panel"
+        >
           <h3>📄 Page {{ page.page_order + 1 }}</h3>
 
-          <div v-for="category in page.categories" :key="category.id" class="category-block">
+          <div
+            v-for="category in page.categories"
+            :key="category.id"
+            class="category-block"
+          >
             <div class="category-header">
-              <input v-model="category.name" class="category-name-input" @change="updateCategory(category)" />
-              <button @click="deleteCategory(category)" class="btn-icon" title="Delete category">✕</button>
+              <input
+                v-model="category.name"
+                class="category-name-input"
+                @change="updateCategory(category)"
+              >
+              <button
+                class="btn-icon"
+                title="Delete category"
+                @click="deleteCategory(category)"
+              >
+                ✕
+              </button>
             </div>
 
             <!-- Items -->
-            <div v-for="item in category.items" :key="item.id" class="item-block">
+            <div
+              v-for="item in category.items"
+              :key="item.id"
+              class="item-block"
+            >
               <div class="item-main">
-                <input v-model="item.name" placeholder="Item name" class="item-name-input" @change="updateItem(item)" />
-                <input v-model.number="item.price_display" placeholder="0.00" class="item-price-input" type="number" step="0.01" @change="updateItemPrice(item)" />
+                <input
+                  v-model="item.name"
+                  placeholder="Item name"
+                  class="item-name-input"
+                  @change="updateItem(item)"
+                >
+                <input
+                  v-model.number="item.price_display"
+                  placeholder="0.00"
+                  class="item-price-input"
+                  type="number"
+                  step="0.01"
+                  @change="updateItemPrice(item)"
+                >
               </div>
-              <input v-model="item.description" placeholder="Description (optional)" class="item-desc-input" @change="updateItem(item)" />
+              <input
+                v-model="item.description"
+                placeholder="Description (optional)"
+                class="item-desc-input"
+                @change="updateItem(item)"
+              >
 
               <!-- Item photo -->
               <div class="item-image-row">
-                <img v-if="item.image_url" :src="item.image_url" class="item-thumb" />
+                <img
+                  v-if="item.image_url"
+                  :src="item.image_url"
+                  class="item-thumb"
+                >
                 <label class="upload-btn upload-btn-small">
                   {{ item.image_url ? '📷' : '+ Photo' }}
-                  <input type="file" accept="image/*" @change="uploadItemImage($event, item)" hidden />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    @change="uploadItemImage($event, item)"
+                  >
                 </label>
-                <button v-if="item.image_url" @click="removeItemImage(item)" class="btn-icon btn-icon-small" title="Remove photo">✕</button>
+                <button
+                  v-if="item.image_url"
+                  class="btn-icon btn-icon-small"
+                  title="Remove photo"
+                  @click="removeItemImage(item)"
+                >
+                  ✕
+                </button>
               </div>
 
               <!-- Dietary tags -->
@@ -121,31 +251,68 @@
                   :class="['tag-btn', { active: itemHasTag(item, tag.code) }]"
                   :title="tag.label"
                   @click="toggleDietaryTag(item, tag.code)"
-                >{{ tag.icon }}</button>
+                >
+                  {{ tag.icon }}
+                </button>
               </div>
 
               <div class="item-meta">
                 <label class="checkbox-label">
-                  <input type="checkbox" v-model="item.is_special_bool" @change="updateItem(item)" /> ⭐ Special
+                  <input
+                    v-model="item.is_special_bool"
+                    type="checkbox"
+                    @change="updateItem(item)"
+                  > ⭐ Special
                 </label>
-                <button @click="deleteItem(item)" class="btn-icon btn-icon-small" title="Delete item">✕</button>
+                <button
+                  class="btn-icon btn-icon-small"
+                  title="Delete item"
+                  @click="deleteItem(item)"
+                >
+                  ✕
+                </button>
               </div>
             </div>
 
-            <button @click="addItem(category)" class="btn btn-link">+ Add item</button>
+            <button
+              class="btn btn-link"
+              @click="addItem(category)"
+            >
+              + Add item
+            </button>
           </div>
 
-          <button @click="addCategory(page)" class="btn btn-outline">+ Add Category</button>
+          <button
+            class="btn btn-outline"
+            @click="addCategory(page)"
+          >
+            + Add Category
+          </button>
         </section>
 
         <!-- Actions -->
         <section class="panel actions">
-          <button @click="refreshPreview" class="btn btn-secondary">Refresh Preview</button>
-          <button @click="publish" class="btn btn-primary" :disabled="publishing">
+          <button
+            class="btn btn-secondary"
+            @click="refreshPreview"
+          >
+            Refresh Preview
+          </button>
+          <button
+            class="btn btn-primary"
+            :disabled="publishing"
+            @click="publish"
+          >
             {{ publishing ? 'Publishing...' : '🚀 Publish Menu' }}
           </button>
-          <p v-if="publishedSlug" class="published-link">
-            Live at: <a :href="'/menu/' + publishedSlug" target="_blank">/menu/{{ publishedSlug }}</a>
+          <p
+            v-if="publishedSlug"
+            class="published-link"
+          >
+            Live at: <a
+              :href="'/menu/' + publishedSlug"
+              target="_blank"
+            >/menu/{{ publishedSlug }}</a>
           </p>
         </section>
       </div>
@@ -154,22 +321,29 @@
     <div class="editor-preview">
       <div class="preview-toolbar">
         <span>Live Preview</span>
-        <span class="preview-dims" v-if="menu">{{ menu.width_px }}×{{ menu.height_px }}</span>
+        <span
+          v-if="menu"
+          class="preview-dims"
+        >{{ menu.width_px }}×{{ menu.height_px }}</span>
       </div>
       <div class="preview-frame-wrapper">
-        <iframe ref="previewFrame" class="preview-frame" :style="previewStyle" />
+        <iframe
+          ref="previewFrame"
+          class="preview-frame"
+          :style="previewStyle"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 
-const route = useRoute()
-const menuId = route.params.id
+const route = useRoute();
+const menuId = route.params.id;
 
 const DIETARY_OPTIONS = [
   { code: 'V', icon: '🌱', label: 'Vegetarian' },
@@ -178,108 +352,108 @@ const DIETARY_OPTIONS = [
   { code: 'DF', icon: '🥛', label: 'Dairy Free' },
   { code: 'NF', icon: '🥜', label: 'Nut Free' },
   { code: '🌶', icon: '🌶️', label: 'Spicy' },
-]
+];
 
-const menu = ref(null)
-const pages = ref([])
-const templates = ref([])
-const settings = ref({})
-const publishing = ref(false)
-const publishedSlug = ref('')
-const previewFrame = ref(null)
-const restaurantLogo = ref(null)
-const restaurantId = ref(null)
-const qrDataUrl = ref(null)
+const menu = ref(null);
+const pages = ref([]);
+const templates = ref([]);
+const settings = ref({});
+const publishing = ref(false);
+const publishedSlug = ref('');
+const previewFrame = ref(null);
+const restaurantLogo = ref(null);
+const restaurantId = ref(null);
+const qrDataUrl = ref(null);
 
 const previewStyle = computed(() => {
-  if (!menu.value) return {}
-  const maxW = 700
-  const scale = Math.min(1, maxW / menu.value.width_px)
+  if (!menu.value) return {};
+  const maxW = 700;
+  const scale = Math.min(1, maxW / menu.value.width_px);
   return {
     width: menu.value.width_px + 'px',
     height: menu.value.height_px + 'px',
     transform: `scale(${scale})`,
     transformOrigin: 'top left',
-  }
-})
+  };
+});
 
 async function loadMenu() {
-  const res = await axios.get(`/api/menus/menus/${menuId}`)
-  menu.value = res.data
-  pages.value = res.data.pages || []
-  settings.value = JSON.parse(res.data.settings_json || '{}')
+  const res = await axios.get(`/api/menus/menus/${menuId}`);
+  menu.value = res.data;
+  pages.value = res.data.pages || [];
+  settings.value = JSON.parse(res.data.settings_json || '{}');
 
   // Add display-friendly price to items
   for (const page of pages.value) {
     for (const cat of page.categories || []) {
       for (const item of cat.items || []) {
-        item.price_display = (item.price_cents / 100).toFixed(2)
-        item.is_special_bool = !!item.is_special
-        item.parsedTags = JSON.parse(item.dietary_tags || '[]')
+        item.price_display = (item.price_cents / 100).toFixed(2);
+        item.is_special_bool = !!item.is_special;
+        item.parsedTags = JSON.parse(item.dietary_tags || '[]');
       }
     }
   }
 
   // Get restaurant slug and logo for published link
-  const restRes = await axios.get(`/api/menus/restaurants/${menu.value.restaurant_id}`)
-  publishedSlug.value = restRes.data.slug
-  restaurantLogo.value = restRes.data.logo_url
-  restaurantId.value = restRes.data.id
+  const restRes = await axios.get(`/api/menus/restaurants/${menu.value.restaurant_id}`);
+  publishedSlug.value = restRes.data.slug;
+  restaurantLogo.value = restRes.data.logo_url;
+  restaurantId.value = restRes.data.id;
 
   // Generate QR if URL is set
   if (settings.value.qrUrl) {
-    generateQr()
+    generateQr();
   }
 
-  await nextTick()
-  refreshPreview()
+  await nextTick();
+  refreshPreview();
 }
 
 async function loadTemplates() {
-  const res = await axios.get('/api/templates')
-  templates.value = res.data
+  const res = await axios.get('/api/templates');
+  templates.value = res.data;
 }
 
 async function saveSettings() {
-  menu.value.settings_json = JSON.stringify(settings.value)
+  menu.value.settings_json = JSON.stringify(settings.value);
   await axios.put(`/api/menus/menus/${menuId}`, {
     width_px: menu.value.width_px,
     height_px: menu.value.height_px,
     template_id: menu.value.template_id,
     settings_json: menu.value.settings_json,
-  })
-  refreshPreview()
+  });
+  refreshPreview();
 }
 
 async function addCategory(page) {
-  const res = await axios.post(`/api/menus/pages/${page.id}/categories`, { name: 'New Category' })
-  res.data.items = []
-  page.categories.push(res.data)
-  refreshPreview()
+  const res = await axios.post(`/api/menus/pages/${page.id}/categories`, { name: 'New Category' });
+  res.data.items = [];
+  page.categories.push(res.data);
+  refreshPreview();
 }
 
 async function updateCategory(category) {
-  await axios.put(`/api/menus/categories/${category.id}`, { name: category.name })
-  refreshPreview()
+  await axios.put(`/api/menus/categories/${category.id}`, { name: category.name });
+  refreshPreview();
 }
 
 async function deleteCategory(category) {
-  await axios.delete(`/api/menus/categories/${category.id}`)
+  await axios.delete(`/api/menus/categories/${category.id}`);
   for (const page of pages.value) {
-    page.categories = page.categories.filter(c => c.id !== category.id)
+    page.categories = page.categories.filter(c => c.id !== category.id);
   }
-  refreshPreview()
+  refreshPreview();
 }
 
 async function addItem(category) {
   const res = await axios.post(`/api/menus/categories/${category.id}/items`, {
     name: 'New Item',
     price_cents: 0,
-  })
-  res.data.price_display = '0.00'
-  res.data.is_special_bool = false
-  category.items.push(res.data)
-  refreshPreview()
+  });
+  res.data.price_display = '0.00';
+  res.data.is_special_bool = false;
+  category.items.push(res.data);
+  refreshPreview();
 }
 
 async function updateItem(item) {
@@ -290,130 +464,130 @@ async function updateItem(item) {
     is_special: item.is_special_bool,
     dietary_tags: item.parsedTags || [],
     image_url: item.image_url,
-  })
-  refreshPreview()
+  });
+  refreshPreview();
 }
 
 async function updateItemPrice(item) {
-  item.price_cents = Math.round((item.price_display || 0) * 100)
-  await updateItem(item)
+  item.price_cents = Math.round((item.price_display || 0) * 100);
+  await updateItem(item);
 }
 
 async function deleteItem(item) {
-  await axios.delete(`/api/menus/items/${item.id}`)
+  await axios.delete(`/api/menus/items/${item.id}`);
   for (const page of pages.value) {
     for (const cat of page.categories) {
-      cat.items = cat.items.filter(i => i.id !== item.id)
+      cat.items = cat.items.filter(i => i.id !== item.id);
     }
   }
-  refreshPreview()
+  refreshPreview();
 }
 
 async function refreshPreview() {
   try {
-    const res = await axios.get(`/api/publish/preview/${menuId}`, { responseType: 'text' })
-    const iframe = previewFrame.value
+    const res = await axios.get(`/api/publish/preview/${menuId}`, { responseType: 'text' });
+    const iframe = previewFrame.value;
     if (iframe) {
-      const doc = iframe.contentDocument || iframe.contentWindow.document
-      doc.open()
-      doc.write(res.data)
-      doc.close()
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(res.data);
+      doc.close();
     }
   } catch (err) {
-    console.error('Preview error:', err)
+    console.error('Preview error:', err);
   }
 }
 
 async function publish() {
-  publishing.value = true
+  publishing.value = true;
   try {
-    await axios.post(`/api/publish/${menuId}`)
-    alert('Menu published! View it at /menu/' + publishedSlug.value)
+    await axios.post(`/api/publish/${menuId}`);
+    alert('Menu published! View it at /menu/' + publishedSlug.value);
   } catch (err) {
-    alert(err.response?.data?.error || 'Publish failed')
+    alert(err.response?.data?.error || 'Publish failed');
   } finally {
-    publishing.value = false
+    publishing.value = false;
   }
 }
 
 // --- Image uploads ---
 
 async function uploadFile(file) {
-  const formData = new FormData()
-  formData.append('image', file)
-  const res = await axios.post('/api/uploads', formData)
-  return res.data.url
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await axios.post('/api/uploads', formData);
+  return res.data.url;
 }
 
 async function uploadLogo(event) {
-  const file = event.target.files[0]
-  if (!file) return
+  const file = event.target.files[0];
+  if (!file) return;
   try {
-    const url = await uploadFile(file)
-    restaurantLogo.value = url
-    await axios.put(`/api/menus/restaurants/${restaurantId.value}`, { logo_url: url })
-    refreshPreview()
+    const url = await uploadFile(file);
+    restaurantLogo.value = url;
+    await axios.put(`/api/menus/restaurants/${restaurantId.value}`, { logo_url: url });
+    refreshPreview();
   } catch (err) {
-    alert('Logo upload failed: ' + (err.response?.data?.error || err.message))
+    alert('Logo upload failed: ' + (err.response?.data?.error || err.message));
   }
 }
 
 async function uploadItemImage(event, item) {
-  const file = event.target.files[0]
-  if (!file) return
+  const file = event.target.files[0];
+  if (!file) return;
   try {
-    const url = await uploadFile(file)
-    item.image_url = url
-    await axios.put(`/api/menus/items/${item.id}`, { image_url: url })
-    refreshPreview()
+    const url = await uploadFile(file);
+    item.image_url = url;
+    await axios.put(`/api/menus/items/${item.id}`, { image_url: url });
+    refreshPreview();
   } catch (err) {
-    alert('Image upload failed: ' + (err.response?.data?.error || err.message))
+    alert('Image upload failed: ' + (err.response?.data?.error || err.message));
   }
 }
 
 async function removeItemImage(item) {
-  item.image_url = null
-  await axios.put(`/api/menus/items/${item.id}`, { image_url: null })
-  refreshPreview()
+  item.image_url = null;
+  await axios.put(`/api/menus/items/${item.id}`, { image_url: null });
+  refreshPreview();
 }
 
 // --- Dietary tags ---
 
 function itemHasTag(item, code) {
-  const tags = Array.isArray(item.parsedTags) ? item.parsedTags : []
-  return tags.includes(code)
+  const tags = Array.isArray(item.parsedTags) ? item.parsedTags : [];
+  return tags.includes(code);
 }
 
 function toggleDietaryTag(item, code) {
-  if (!Array.isArray(item.parsedTags)) item.parsedTags = []
-  const idx = item.parsedTags.indexOf(code)
+  if (!Array.isArray(item.parsedTags)) item.parsedTags = [];
+  const idx = item.parsedTags.indexOf(code);
   if (idx >= 0) {
-    item.parsedTags.splice(idx, 1)
+    item.parsedTags.splice(idx, 1);
   } else {
-    item.parsedTags.push(code)
+    item.parsedTags.push(code);
   }
-  item.dietary_tags = JSON.stringify(item.parsedTags)
-  updateItem(item)
+  item.dietary_tags = JSON.stringify(item.parsedTags);
+  updateItem(item);
 }
 
 // --- QR Code ---
 
 async function generateQr() {
-  if (!settings.value.qrUrl) return
+  if (!settings.value.qrUrl) return;
   try {
-    const res = await axios.post('/api/qrcode/generate', { url: settings.value.qrUrl, size: 200 })
-    qrDataUrl.value = res.data.dataUrl
-    settings.value.qrDataUrl = res.data.dataUrl
-    saveSettings()
+    const res = await axios.post('/api/qrcode/generate', { url: settings.value.qrUrl, size: 200 });
+    qrDataUrl.value = res.data.dataUrl;
+    settings.value.qrDataUrl = res.data.dataUrl;
+    saveSettings();
   } catch (err) {
-    console.error('QR generation failed:', err)
+    console.error('QR generation failed:', err);
   }
 }
 
 onMounted(() => {
-  loadTemplates()
-  loadMenu()
-})
+  loadTemplates();
+  loadMenu();
+});
 </script>
 
 <style scoped>
