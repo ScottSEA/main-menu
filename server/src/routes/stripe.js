@@ -8,6 +8,7 @@ const router = express.Router();
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const isStripeConfigured = STRIPE_KEY && !STRIPE_KEY.startsWith('sk_test_placeholder');
+const APP_URL = process.env.APP_URL || 'http://localhost:5173';
 
 let stripe;
 if (isStripeConfigured) {
@@ -90,8 +91,8 @@ router.post('/checkout', authenticate, (req, res) => {
           quantity: 1,
         }],
         metadata: { user_id: req.user.id, plan },
-        success_url: `${req.headers.origin || 'http://localhost:5173'}/dashboard?subscribed=true`,
-        cancel_url: `${req.headers.origin || 'http://localhost:5173'}/dashboard`,
+        success_url: `${APP_URL}/dashboard?subscribed=true`,
+        cancel_url: `${APP_URL}/dashboard`,
       });
 
       res.json({ url: session.url });
@@ -119,7 +120,7 @@ router.post('/portal', authenticate, (req, res) => {
     try {
       const session = await stripe.billingPortal.sessions.create({
         customer: user.stripe_customer_id,
-        return_url: `${req.headers.origin || 'http://localhost:5173'}/dashboard`,
+        return_url: `${APP_URL}/dashboard`,
       });
       res.json({ url: session.url });
     } catch (err) {
