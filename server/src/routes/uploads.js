@@ -20,7 +20,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     // Accept common image extensions and MIME types
     // We validate actual content with sharp after upload
-    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/octet-stream'];
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
     const ext = path.extname(file.originalname).toLowerCase();
 
