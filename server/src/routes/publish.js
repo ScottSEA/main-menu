@@ -41,15 +41,15 @@ router.post('/:menuId', authenticate, (req, res) => {
       return res.status(404).json({ error: 'Menu not found' });
     }
 
-    // Check subscription
+    // Check subscription (free tier cannot publish)
     const sub = db.prepare(`
-      SELECT s.status FROM subscriptions s
+      SELECT s.status, s.plan FROM subscriptions s
       JOIN restaurants r ON s.user_id = r.user_id
-      WHERE r.id = ? AND s.status = 'active'
+      WHERE r.id = ? AND s.status = 'active' AND s.plan != 'free'
     `).get(menu.restaurant_id);
 
     if (!sub) {
-      return res.status(403).json({ error: 'Active subscription required to publish' });
+      return res.status(403).json({ error: 'Paid subscription required to publish. Upgrade your plan to get started.' });
     }
 
     const result = publishMenu(menu.id);
