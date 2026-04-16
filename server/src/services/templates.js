@@ -22,7 +22,18 @@ function listTemplates() {
 }
 
 function getTemplate(templateId) {
+  // Validate templateId to prevent path traversal
+  if (!/^[a-z0-9_-]+$/i.test(templateId)) {
+    return null;
+  }
+
   const templateDir = path.join(TEMPLATES_DIR, templateId);
+
+  // Ensure resolved path stays within TEMPLATES_DIR
+  if (!path.resolve(templateDir).startsWith(path.resolve(TEMPLATES_DIR))) {
+    return null;
+  }
+
   const metaPath = path.join(templateDir, 'meta.json');
   const htmlPath = path.join(templateDir, 'template.html');
 
