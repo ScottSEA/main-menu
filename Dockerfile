@@ -13,7 +13,6 @@ RUN cd server && npm ci --omit=dev
 
 COPY server/ ./server/
 COPY templates/ ./templates/
-COPY .env.example ./.env
 COPY --from=client-build /app/client/dist ./client/dist
 
 RUN mkdir -p uploads published
