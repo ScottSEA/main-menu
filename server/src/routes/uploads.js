@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { authenticate } = require('../middleware/auth');
+const { getDb } = require('../db/schema');
 
 const router = express.Router();
 const UPLOADS_DIR = path.join(__dirname, '..', '..', '..', 'uploads');
@@ -61,6 +62,13 @@ router.post('/', upload.single('image'), async (req, res) => {
       .toFile(outputPath);
 
     const url = `/uploads/${filename}`;
+
+    // Track upload ownership
+    const db = getDb();
+    db.prepare('INSERT INTO uploads (id, user_id, filename, original_name) VALUES (?, ?, ?, ?)').run(
+      uuidv4(), req.user.id, filename, req.file.originalname
+    );
+
     res.status(201).json({ url, filename });
   } catch (err) {
     if (err.message && err.message.includes('Only')) {
@@ -79,12 +87,19 @@ router.delete('/:filename', (req, res) => {
     return res.status(400).json({ error: 'Invalid filename' });
   }
 
-  const filePath = path.join(UPLOADS_DIR, filename);
-  if (!fs.existsSync(filePath)) {
+  // Verify ownership
+  const db = getDb();
+  const upload = db.prepare('SELECT * FROM uploads WHERE filename = ? AND user_id = ?').get(filename, req.user.id);
+  if (!upload) {
     return res.status(404).json({ error: 'File not found' });
   }
 
-  fs.unlinkSync(filePath);
+  const filePath = path.join(UPLOADS_DIR, filename);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+
+  db.prepare('DELETE FROM uploads WHERE id = ?').run(upload.id);
   res.status(204).send();
 });
 

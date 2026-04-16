@@ -114,6 +114,16 @@ function initializeSchema() {
     CREATE INDEX IF NOT EXISTS idx_restaurants_user ON restaurants(user_id);
     CREATE INDEX IF NOT EXISTS idx_menus_restaurant ON menus(restaurant_id);
     CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
+
+    CREATE TABLE IF NOT EXISTS uploads (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      filename TEXT NOT NULL UNIQUE,
+      original_name TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_uploads_user ON uploads(user_id);
+    CREATE INDEX IF NOT EXISTS idx_uploads_filename ON uploads(filename);
   `);
 
   // Seed templates from disk
