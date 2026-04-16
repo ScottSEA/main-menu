@@ -27,10 +27,11 @@ router.post('/register', async (req, res) => {
     const id = uuidv4();
     const password_hash = await bcrypt.hash(password, 12);
 
-    db.prepare('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)').run(id, email, password_hash);
-
-    // Create a default free subscription
-    db.prepare('INSERT INTO subscriptions (id, user_id, plan, status) VALUES (?, ?, ?, ?)').run(uuidv4(), id, 'free', 'active');
+    const registerUser = db.transaction(() => {
+      db.prepare('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)').run(id, email, password_hash);
+      db.prepare('INSERT INTO subscriptions (id, user_id, plan, status) VALUES (?, ?, ?, ?)').run(uuidv4(), id, 'free', 'active');
+    });
+    registerUser();
 
     const token = generateToken({ id, email });
     res.status(201).json({ token, user: { id, email } });
