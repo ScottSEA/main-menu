@@ -56,16 +56,25 @@ function compileMenu(menuId) {
     };
   });
 
+  // Whitelist allowed settings keys to prevent overriding structural template data
+  const ALLOWED_SETTINGS = ['fontFamily', 'backgroundColor', 'textColor', 'accentColor', 'columns', 'showPrices', 'showDescriptions', 'qrDataUrl', 'rotationInterval'];
+  const safeSettings = {};
+  for (const key of ALLOWED_SETTINGS) {
+    if (key in settings) {
+      safeSettings[key] = settings[key];
+    }
+  }
+
   // Compile the Handlebars template
   const compiled = Handlebars.compile(template.html);
   const html = compiled({
+    ...safeSettings,
     restaurantName: restaurant.name,
     logoUrl: restaurant.logo_url,
     widthPx: menu.width_px,
     heightPx: menu.height_px,
     qrDataUrl: settings.qrDataUrl || null,
     pages: pageData,
-    ...settings,
   });
 
   return html;
