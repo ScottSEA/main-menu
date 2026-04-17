@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { getDb } = require('../db/schema');
 
 const KNOWN_DEFAULTS = ['dev-secret-change-me', 'change-me-to-a-random-secret'];
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -30,6 +31,17 @@ function authenticate(req, res, next) {
     const token = header.slice(7);
     const payload = jwt.verify(token, JWT_SECRET);
     req.user = payload;
+
+    // Reject tokens issued before the last password change
+    const db = getDb();
+    const user = db.prepare('SELECT password_changed_at FROM users WHERE id = ?').get(payload.id);
+    if (user?.password_changed_at) {
+      const changedAt = Math.floor(new Date(user.password_changed_at).getTime() / 1000);
+      if (payload.iat < changedAt) {
+        return res.status(401).json({ error: 'Token invalidated by password change' });
+      }
+    }
+
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' });

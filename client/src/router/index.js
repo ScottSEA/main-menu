@@ -18,6 +18,16 @@ const routes = [
     component: () => import('../views/RegisterView.vue'),
   },
   {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('../views/ForgotPasswordView.vue'),
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('../views/ResetPasswordView.vue'),
+  },
+  {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('../views/DashboardView.vue'),
@@ -40,6 +50,17 @@ const routes = [
     name: 'Wizard',
     component: () => import('../views/WizardView.vue'),
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/account',
+    name: 'Account',
+    component: () => import('../views/AccountView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('../views/NotFoundView.vue'),
   },
 ];
 

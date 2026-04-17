@@ -27,6 +27,9 @@ function handleLogout() {
         <router-link to="/subscription">
           Subscription
         </router-link>
+        <router-link to="/account">
+          Account
+        </router-link>
         <button
           class="logout-btn"
           @click="handleLogout"

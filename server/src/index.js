@@ -2,13 +2,25 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.e
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 const { initializeSchema } = require('./db/schema');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Security headers — allow inline styles/scripts for template rendering
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+    },
+  },
+}));
+
 app.use(cors({ origin: process.env.APP_URL || 'http://localhost:5173' }));
 
 // Stripe webhook needs raw body — mount BEFORE express.json()

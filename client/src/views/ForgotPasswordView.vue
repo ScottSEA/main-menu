@@ -1,7 +1,13 @@
 <template>
   <div class="auth-form">
-    <h2>Sign In</h2>
-    <form @submit.prevent="handleLogin">
+    <h2>Reset Password</h2>
+    <p class="subtitle">
+      Enter your email and we'll send you a link to reset your password.
+    </p>
+    <form
+      v-if="!submitted"
+      @submit.prevent="handleSubmit"
+    >
       <div class="field">
         <label for="email">Email</label>
         <input
@@ -11,40 +17,29 @@
           required
         >
       </div>
-      <div class="field">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          v-model="password"
-          type="password"
-          required
-        >
-      </div>
       <p
         v-if="error"
         class="error"
       >
         {{ error }}
       </p>
-      <p
-        v-if="loginFailed"
-        class="forgot"
-      >
-        <router-link to="/forgot-password">
-          Forgot your password?
-        </router-link>
-      </p>
       <button
         type="submit"
         class="btn btn-primary"
         :disabled="loading"
       >
-        {{ loading ? 'Signing in...' : 'Sign In' }}
+        {{ loading ? 'Sending...' : 'Send Reset Link' }}
       </button>
     </form>
+    <div
+      v-else
+      class="success-message"
+    >
+      <p>✓ {{ message }}</p>
+    </div>
     <p class="switch">
-      Don't have an account? <router-link to="/register">
-        Register
+      <router-link to="/login">
+        Back to Sign In
       </router-link>
     </p>
   </div>
@@ -52,26 +47,23 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
+import axios from 'axios';
 
-const auth = useAuthStore();
-const router = useRouter();
 const email = ref('');
-const password = ref('');
 const error = ref('');
+const message = ref('');
 const loading = ref(false);
-const loginFailed = ref(false);
+const submitted = ref(false);
 
-async function handleLogin() {
+async function handleSubmit() {
   error.value = '';
   loading.value = true;
   try {
-    await auth.login(email.value, password.value);
-    router.push('/dashboard');
+    const res = await axios.post('/api/auth/forgot-password', { email: email.value });
+    message.value = res.data.message;
+    submitted.value = true;
   } catch (err) {
-    error.value = err.response?.data?.error || 'Login failed';
-    loginFailed.value = true;
+    error.value = err.response?.data?.error || 'Something went wrong';
   } finally {
     loading.value = false;
   }
@@ -84,16 +76,16 @@ async function handleLogin() {
   margin: 3rem auto;
   padding: 2rem;
 }
-h2 { margin-bottom: 1.5rem; }
+h2 { margin-bottom: 0.5rem; }
+.subtitle { color: var(--text-muted); margin-bottom: 1.5rem; }
 .field { margin-bottom: 1rem; }
 label { display: block; margin-bottom: 0.25rem; font-weight: 600; color: var(--text); }
 input { width: 100%; }
 .error { color: var(--danger); font-size: 0.9rem; }
+.success-message { background: #e8f5e9; padding: 1rem; border-radius: 6px; color: #2e7d32; }
 .btn { width: 100%; padding: 0.75rem; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; }
 .btn-primary { background: var(--accent); color: white; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.switch { text-align: center; margin-top: 1rem; color: var(--text-muted); }
+.switch { text-align: center; margin-top: 1rem; }
 .switch a { color: var(--accent); }
-.forgot { margin-top: 0.5rem; text-align: center; }
-.forgot a { color: var(--accent); font-size: 0.9rem; }
 </style>

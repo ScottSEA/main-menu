@@ -45,5 +45,5 @@ export const useAuthStore = defineStore('auth', () => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
   }
 
-  return { token, user, isAuthenticated, register, login, logout };
+  return { token, user, isAuthenticated, setAuth, register, login, logout };
 });

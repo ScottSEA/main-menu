@@ -1,5 +1,24 @@
 <template>
   <div class="editor">
+    <div
+      v-if="loadingEditor"
+      class="editor-loading"
+    >
+      Loading editor…
+    </div>
+    <div
+      v-else-if="loadEditorError"
+      class="editor-error"
+    >
+      <p>{{ loadEditorError }}</p>
+      <router-link
+        to="/dashboard"
+        class="btn"
+      >
+        Back to Dashboard
+      </router-link>
+    </div>
+    <template v-else>
     <div class="editor-sidebar">
       <div class="sidebar-header">
         <router-link
@@ -334,6 +353,7 @@
         />
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -364,6 +384,8 @@ const previewFrame = ref(null);
 const restaurantLogo = ref(null);
 const restaurantId = ref(null);
 const qrDataUrl = ref(null);
+const loadingEditor = ref(true);
+const loadEditorError = ref('');
 
 const previewStyle = computed(() => {
   if (!menu.value) return {};
@@ -584,9 +606,16 @@ async function generateQr() {
   }
 }
 
-onMounted(() => {
-  loadTemplates();
-  loadMenu();
+onMounted(async () => {
+  loadingEditor.value = true;
+  loadEditorError.value = '';
+  try {
+    await Promise.all([loadTemplates(), loadMenu()]);
+  } catch (err) {
+    loadEditorError.value = err.response?.data?.error || 'Failed to load menu editor';
+  } finally {
+    loadingEditor.value = false;
+  }
 });
 </script>
 
@@ -594,6 +623,31 @@ onMounted(() => {
 .editor {
   display: flex;
   height: calc(100vh - 60px);
+}
+.editor-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+.editor-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 1rem;
+  color: #fca5a5;
+}
+.editor-error .btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--bg-surface);
 }
 
 .editor-sidebar {

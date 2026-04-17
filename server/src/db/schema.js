@@ -22,6 +22,7 @@ function initializeSchema() {
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      password_changed_at TEXT,
       stripe_customer_id TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
@@ -124,7 +125,24 @@ function initializeSchema() {
     );
     CREATE INDEX IF NOT EXISTS idx_uploads_user ON uploads(user_id);
     CREATE INDEX IF NOT EXISTS idx_uploads_filename ON uploads(filename);
+
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token_hash TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      used INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id);
+    CREATE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets(token_hash);
   `);
+
+  // Migrations for existing databases
+  const columns = db.pragma('table_info(users)').map(c => c.name);
+  if (!columns.includes('password_changed_at')) {
+    db.exec("ALTER TABLE users ADD COLUMN password_changed_at TEXT");
+  }
 
   // Seed templates from disk
   seedTemplates(db);

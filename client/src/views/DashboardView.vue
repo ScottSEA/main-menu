@@ -3,7 +3,29 @@
     <h2>Dashboard</h2>
     <p>Welcome, {{ auth.user?.email }}</p>
 
-    <section class="restaurants">
+    <div
+      v-if="loadingPage"
+      class="loading"
+    >
+      Loading your restaurants…
+    </div>
+    <div
+      v-else-if="loadError"
+      class="error-banner"
+    >
+      <p>{{ loadError }}</p>
+      <button
+        class="btn btn-small"
+        @click="loadRestaurants"
+      >
+        Retry
+      </button>
+    </div>
+
+    <section
+      v-else
+      class="restaurants"
+    >
       <div class="section-header">
         <h3>Your Restaurants</h3>
         <router-link
@@ -138,6 +160,8 @@ const slugManuallyEdited = ref(false);
 const slugAvailable = ref(null);
 const slugChecking = ref(false);
 const createError = ref('');
+const loadingPage = ref(true);
+const loadError = ref('');
 let slugCheckTimer = null;
 
 // Auto-generate slug from name unless user manually edited it
@@ -169,13 +193,20 @@ function sanitizeSlug() {
 }
 
 async function loadRestaurants() {
-  const res = await axios.get('/api/menus/restaurants');
-  // Load menus for each restaurant
-  for (const r of res.data) {
-    const menusRes = await axios.get(`/api/menus/restaurants/${r.id}/menus`);
-    r.menus = menusRes.data;
+  loadingPage.value = true;
+  loadError.value = '';
+  try {
+    const res = await axios.get('/api/menus/restaurants');
+    for (const r of res.data) {
+      const menusRes = await axios.get(`/api/menus/restaurants/${r.id}/menus`);
+      r.menus = menusRes.data;
+    }
+    restaurants.value = res.data;
+  } catch (err) {
+    loadError.value = err.response?.data?.error || 'Failed to load restaurants';
+  } finally {
+    loadingPage.value = false;
   }
-  restaurants.value = res.data;
 }
 
 async function createRestaurant() {
@@ -274,6 +305,9 @@ onMounted(loadRestaurants);
 .menu-status.draft { background: #92400e33; color: var(--warning); }
 .menu-status.published { background: #065f4633; color: var(--success); }
 .empty { color: var(--text-muted); padding: 2rem; text-align: center; }
+.loading { color: var(--text-muted); padding: 2rem; text-align: center; }
+.error-banner { padding: 1rem; background: #7f1d1d33; border: 1px solid #991b1b; border-radius: 8px; color: #fca5a5; text-align: center; margin-top: 2rem; }
+.error-banner .btn { margin-top: 0.5rem; }
 .error { color: var(--danger); font-size: 0.9rem; }
 .btn { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.9rem; background: var(--bg-surface); color: var(--text); text-decoration: none; }
 .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
