@@ -3,7 +3,7 @@ const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const { authenticate } = require('../middleware/auth');
 const { getDb } = require('../db/schema');
 
@@ -53,7 +53,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
 
     // Re-encode to strip EXIF and normalize format
-    const filename = `${uuidv4()}.webp`;
+    const filename = `${crypto.randomUUID()}.webp`;
     const outputPath = path.join(UPLOADS_DIR, filename);
 
     await sharp(req.file.buffer)
@@ -66,7 +66,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     // Track upload ownership
     const db = getDb();
     db.prepare('INSERT INTO uploads (id, user_id, filename, original_name) VALUES (?, ?, ?, ?)').run(
-      uuidv4(), req.user.id, filename, req.file.originalname
+      crypto.randomUUID(), req.user.id, filename, req.file.originalname
     );
 
     res.status(201).json({ url, filename });

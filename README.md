@@ -44,6 +44,10 @@ A SaaS platform where restaurant subscribers can **create, customize, and publis
 - **Stripe Integration** — Subscription tiers with payment processing
 - **Tier-Based Features** — Free trial → paid tiers with increasing capabilities
 
+## Prerequisites
+
+- **Node.js ≥ 20** — Required by Vite and better-sqlite3. Check with `node --version`.
+
 ## Tech Stack
 
 | Layer       | Technology                          |

@@ -1,5 +1,5 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const { getDb } = require('../db/schema');
 const { authenticate } = require('../middleware/auth');
 
@@ -41,7 +41,7 @@ router.post('/restaurants', (req, res) => {
     return res.status(409).json({ error: 'Slug already taken' });
   }
 
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   db.prepare('INSERT INTO restaurants (id, user_id, name, slug) VALUES (?, ?, ?, ?)').run(id, req.user.id, name, slug);
 
   const restaurant = db.prepare('SELECT * FROM restaurants WHERE id = ?').get(id);
@@ -111,14 +111,14 @@ router.post('/restaurants/:restaurantId/menus', (req, res) => {
     return res.status(404).json({ error: 'Restaurant not found' });
   }
 
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   db.prepare(`
     INSERT INTO menus (id, restaurant_id, name, template_id, width_px, height_px)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(id, req.params.restaurantId, name, template_id || null, width_px || 1920, height_px || 1080);
 
   // Create a default first page
-  const pageId = uuidv4();
+  const pageId = crypto.randomUUID();
   db.prepare('INSERT INTO menu_pages (id, menu_id, page_order) VALUES (?, ?, 0)').run(pageId, id);
 
   const menu = db.prepare('SELECT * FROM menus WHERE id = ?').get(id);
@@ -220,7 +220,7 @@ router.post('/pages/:pageId/categories', (req, res) => {
   const maxOrder = db.prepare('SELECT MAX(sort_order) as max_order FROM menu_categories WHERE menu_page_id = ?').get(req.params.pageId);
   const sortOrder = (maxOrder?.max_order ?? -1) + 1;
 
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   db.prepare('INSERT INTO menu_categories (id, menu_page_id, name, sort_order) VALUES (?, ?, ?, ?)').run(id, req.params.pageId, name, sortOrder);
 
   const category = db.prepare('SELECT * FROM menu_categories WHERE id = ?').get(id);
@@ -299,7 +299,7 @@ router.post('/categories/:categoryId/items', (req, res) => {
   const maxOrder = db.prepare('SELECT MAX(sort_order) as max_order FROM menu_items WHERE category_id = ?').get(req.params.categoryId);
   const sortOrder = (maxOrder?.max_order ?? -1) + 1;
 
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   db.prepare(`
     INSERT INTO menu_items (id, category_id, name, description, price_cents, dietary_tags, is_special, sort_order)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)

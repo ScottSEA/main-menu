@@ -161,11 +161,11 @@ router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) =>
           WHERE user_id = ?
         `).run(subscriptionId, plan, userId);
       } else {
-        const { v4: uuidv4 } = require('uuid');
+        const crypto = require('crypto');
         db.prepare(`
           INSERT INTO subscriptions (id, user_id, stripe_subscription_id, plan, status)
           VALUES (?, ?, ?, ?, 'active')
-        `).run(uuidv4(), userId, subscriptionId, plan);
+        `).run(crypto.randomUUID(), userId, subscriptionId, plan);
       }
       break;
     }

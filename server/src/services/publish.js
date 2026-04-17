@@ -1,5 +1,5 @@
 const Handlebars = require('handlebars');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const { getDb } = require('../db/schema');
 const { getTemplate } = require('./templates');
 
@@ -88,7 +88,7 @@ function publishMenu(menuId) {
   const latest = db.prepare('SELECT MAX(version) as v FROM published_snapshots WHERE menu_id = ?').get(menuId);
   const version = (latest?.v || 0) + 1;
 
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   db.prepare(`
     INSERT INTO published_snapshots (id, menu_id, version, html_content, published_at)
     VALUES (?, ?, ?, ?, datetime('now'))

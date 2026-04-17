@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const { getDb } = require('../db/schema');
 const { generateToken, authenticate } = require('../middleware/auth');
 
@@ -24,12 +24,12 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'Email already registered' });
     }
 
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     const password_hash = await bcrypt.hash(password, 12);
 
     const registerUser = db.transaction(() => {
       db.prepare('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)').run(id, email, password_hash);
-      db.prepare('INSERT INTO subscriptions (id, user_id, plan, status) VALUES (?, ?, ?, ?)').run(uuidv4(), id, 'free', 'active');
+      db.prepare('INSERT INTO subscriptions (id, user_id, plan, status) VALUES (?, ?, ?, ?)').run(crypto.randomUUID(), id, 'free', 'active');
     });
     registerUser();
 
