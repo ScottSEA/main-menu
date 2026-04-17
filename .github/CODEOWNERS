@@ -1,0 +1,15 @@
+# Default owners for everything
+* @ScottSEA
+
+# Server code
+/server/ @ScottSEA
+
+# Client code
+/client/ @ScottSEA
+
+# CI/CD and config
+/.github/ @ScottSEA
+Dockerfile @ScottSEA
+
+# Templates
+/templates/ @ScottSEA

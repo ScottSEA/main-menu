@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{restaurantName}} — Menu</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: {{widthPx}}px;
+      height: {{heightPx}}px;
+      overflow: hidden;
+      font-family: {{fontFamily}};
+      background: {{backgroundColor}};
+      color: {{textColor}};
+    }
+
+    .menu-page {
+      width: 100%;
+      height: 100%;
+      display: none;
+      padding: 2.5% 3%;
+    }
+
+    .menu-page.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .menu-header {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      margin-bottom: 1.5%;
+      padding-bottom: 1%;
+      border-bottom: 2px solid {{accentColor}}20;
+    }
+
+    .menu-header .logo {
+      max-height: 64px;
+      border-radius: 8px;
+    }
+
+    .menu-header h1 {
+      font-size: 2em;
+      font-weight: 700;
+      color: {{textColor}};
+      letter-spacing: -0.01em;
+    }
+
+    .menu-header h1 span {
+      color: {{accentColor}};
+    }
+
+    /* ── Body grid ── */
+    .menu-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat({{columns}}, 1fr);
+      gap: 1.8em;
+      overflow: hidden;
+      align-content: start;
+    }
+
+    /* ── Category ── */
+    .category {
+      break-inside: avoid;
+    }
+
+    .category-name {
+      font-size: 1.1em;
+      font-weight: 700;
+      color: {{accentColor}};
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.6em;
+      padding-left: 0.2em;
+    }
+
+    .items-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6em;
+    }
+
+    /* ── Item card ── */
+    .menu-item {
+      background: {{textColor}}06;
+      border: 1px solid {{textColor}}0a;
+      border-radius: 12px;
+      padding: 0.8em;
+      display: flex;
+      gap: 0.8em;
+      align-items: flex-start;
+      transition: box-shadow 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .item-image {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5em;
+    }
+
+    .item-name {
+      font-size: 1em;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .item-price {
+      font-size: 1em;
+      font-weight: 700;
+      color: {{accentColor}};
+      white-space: nowrap;
+    }
+
+    .item-description {
+      font-size: 0.82em;
+      color: {{textColor}}99;
+      margin-top: 0.2em;
+      line-height: 1.35;
+    }
+
+    .item-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      margin-top: 0.35em;
+      flex-wrap: wrap;
+    }
+
+    .dietary-tag {
+      font-size: 0.65em;
+      padding: 0.15em 0.5em;
+      border-radius: 999px;
+      background: {{accentColor}}15;
+      color: {{accentColor}};
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .special-badge {
+      font-size: 0.65em;
+      padding: 0.15em 0.55em;
+      border-radius: 999px;
+      background: {{accentColor}};
+      color: {{backgroundColor}};
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Footer ── */
+    .menu-footer {
+      margin-top: auto;
+      padding-top: 1%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8em;
+      font-size: 0.8em;
+      color: {{textColor}}60;
+    }
+
+    .qr-code {
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      border: 1px solid {{textColor}}10;
+    }
+  </style>
+</head>
+<body>
+  {{#each pages}}
+  <div class="menu-page {{#if @first}}active{{/if}}" data-page="{{@index}}" data-duration="{{this.duration_seconds}}">
+    <div class="menu-header">
+      {{#if ../logoUrl}}<img class="logo" src="{{../logoUrl}}" alt="{{../restaurantName}}" />{{/if}}
+      <h1>{{../restaurantName}}</h1>
+    </div>
+
+    <div class="menu-body">
+      {{#each this.columns}}
+        {{#each this}}
+        <div class="category">
+          <div class="category-name">{{this.name}}</div>
+          <div class="items-grid">
+            {{#each this.items}}
+            <div class="menu-item">
+              {{#if this.image_url}}<img class="item-image" src="{{this.image_url}}" alt="{{this.name}}" />{{/if}}
+              <div class="item-content">
+                <div class="item-top-row">
+                  <span class="item-name">{{this.name}}</span>
+                  <span class="item-price">{{this.formattedPrice}}</span>
+                </div>
+                {{#if this.description}}<div class="item-description">{{this.description}}</div>{{/if}}
+                {{#if this.is_special}}
+                <div class="item-meta">
+                  <span class="special-badge">★ Special</span>
+                  {{#each this.dietaryTags}}<span class="dietary-tag">{{this}}</span>{{/each}}
+                </div>
+                {{else}}
+                {{#if this.dietaryTags.length}}
+                <div class="item-meta">
+                  {{#each this.dietaryTags}}<span class="dietary-tag">{{this}}</span>{{/each}}
+                </div>
+                {{/if}}
+                {{/if}}
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        {{/each}}
+      {{/each}}
+    </div>
+
+    <div class="menu-footer">
+      {{#if ../qrDataUrl}}<img class="qr-code" src="{{../qrDataUrl}}" alt="QR Code" />{{/if}}
+      {{../restaurantName}}
+    </div>
+  </div>
+  {{/each}}
+
+  <script>
+    (function() {
+      const pages = document.querySelectorAll('.menu-page');
+      if (pages.length <= 1) return;
+
+      let current = 0;
+      function rotate() {
+        pages[current].classList.remove('active');
+        current = (current + 1) % pages.length;
+        pages[current].classList.add('active');
+        const duration = parseInt(pages[current].dataset.duration || '10', 10);
+        setTimeout(rotate, duration * 1000);
+      }
+
+      const firstDuration = parseInt(pages[0].dataset.duration || '10', 10);
+      setTimeout(rotate, firstDuration * 1000);
+
+      // Periodic refresh to pick up menu changes
+      setTimeout(() => location.reload(), 5 * 60 * 1000);
+    })();
+  </script>
+</body>
+</html>
