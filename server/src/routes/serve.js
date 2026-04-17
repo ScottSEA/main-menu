@@ -1,10 +1,21 @@
 const express = require('express');
+const helmet = require('helmet');
 const { getDb } = require('../db/schema');
 
 const router = express.Router();
 
+// Stricter CSP for published menus — no scripts needed
+const menuCsp = helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'none'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    imgSrc: ["'self'", "data:", "blob:"],
+  },
+});
+
 // Serve published menu by restaurant slug
-router.get('/:slug', (req, res) => {
+router.get('/:slug', menuCsp, (req, res) => {
   const db = getDb();
 
   // Find restaurant by slug

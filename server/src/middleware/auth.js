@@ -32,10 +32,13 @@ function authenticate(req, res, next) {
     const payload = jwt.verify(token, JWT_SECRET);
     req.user = payload;
 
-    // Reject tokens issued before the last password change
+    // Reject tokens for deleted users or those issued before password change
     const db = getDb();
     const user = db.prepare('SELECT password_changed_at FROM users WHERE id = ?').get(payload.id);
-    if (user?.password_changed_at) {
+    if (!user) {
+      return res.status(401).json({ error: 'User no longer exists' });
+    }
+    if (user.password_changed_at) {
       const changedAt = Math.floor(new Date(user.password_changed_at).getTime() / 1000);
       if (payload.iat < changedAt) {
         return res.status(401).json({ error: 'Token invalidated by password change' });

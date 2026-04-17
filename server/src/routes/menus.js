@@ -30,6 +30,10 @@ router.post('/restaurants', (req, res) => {
     return res.status(400).json({ error: 'Name and slug are required' });
   }
 
+  if (name.length > 200) {
+    return res.status(400).json({ error: 'Name too long (max 200 characters)' });
+  }
+
   const slugPattern = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
   if (!slugPattern.test(slug) || slug.length < 3) {
     return res.status(400).json({ error: 'Slug must be lowercase alphanumeric with hyphens, at least 3 characters' });
@@ -103,6 +107,10 @@ router.post('/restaurants/:restaurantId/menus', (req, res) => {
 
   if (!name) {
     return res.status(400).json({ error: 'Menu name is required' });
+  }
+
+  if (name.length > 200) {
+    return res.status(400).json({ error: 'Name too long (max 200 characters)' });
   }
 
   const db = getDb();
@@ -204,6 +212,10 @@ router.post('/pages/:pageId/categories', (req, res) => {
     return res.status(400).json({ error: 'Category name is required' });
   }
 
+  if (name.length > 200) {
+    return res.status(400).json({ error: 'Name too long (max 200 characters)' });
+  }
+
   const db = getDb();
   // Verify ownership through the chain: page -> menu -> restaurant -> user
   const page = db.prepare(`
@@ -283,6 +295,10 @@ router.post('/categories/:categoryId/items', (req, res) => {
     return res.status(400).json({ error: 'Name and price_cents are required' });
   }
 
+  if (!Number.isInteger(price_cents) || price_cents < 0) {
+    return res.status(400).json({ error: 'price_cents must be a non-negative integer' });
+  }
+
   const db = getDb();
   const category = db.prepare(`
     SELECT mc.id FROM menu_categories mc
@@ -324,6 +340,10 @@ router.put('/items/:id', (req, res) => {
 
   if (!item) {
     return res.status(404).json({ error: 'Item not found' });
+  }
+
+  if (price_cents !== undefined && (!Number.isInteger(price_cents) || price_cents < 0)) {
+    return res.status(400).json({ error: 'price_cents must be a non-negative integer' });
   }
 
   db.prepare(`

@@ -55,7 +55,7 @@ router.get('/status', authenticate, (req, res) => {
 });
 
 // Create checkout session
-router.post('/checkout', authenticate, (req, res) => {
+router.post('/checkout', authenticate, async (req, res) => {
   if (!isStripeConfigured) {
     return res.status(503).json({ error: 'Stripe not configured. Add STRIPE_SECRET_KEY to .env' });
   }
@@ -68,43 +68,39 @@ router.post('/checkout', authenticate, (req, res) => {
   const db = getDb();
   let user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
 
-  // Create Stripe checkout session
-  (async () => {
-    try {
-      // Ensure customer exists in Stripe
-      if (!user.stripe_customer_id) {
-        const customer = await stripe.customers.create({ email: user.email });
-        db.prepare('UPDATE users SET stripe_customer_id = ? WHERE id = ?').run(customer.id, user.id);
-        user.stripe_customer_id = customer.id;
-      }
-
-      const session = await stripe.checkout.sessions.create({
-        customer: user.stripe_customer_id,
-        mode: 'subscription',
-        line_items: [{
-          price_data: {
-            currency: 'usd',
-            product_data: { name: `Main Menu ${PLANS[plan].name}` },
-            unit_amount: PLANS[plan].price_monthly,
-            recurring: { interval: 'month' },
-          },
-          quantity: 1,
-        }],
-        metadata: { user_id: req.user.id, plan },
-        success_url: `${APP_URL}/dashboard?subscribed=true`,
-        cancel_url: `${APP_URL}/dashboard`,
-      });
-
-      res.json({ url: session.url });
-    } catch (err) {
-      console.error('Stripe checkout error:', err);
-      res.status(500).json({ error: 'Failed to create checkout session' });
+  try {
+    if (!user.stripe_customer_id) {
+      const customer = await stripe.customers.create({ email: user.email });
+      db.prepare('UPDATE users SET stripe_customer_id = ? WHERE id = ?').run(customer.id, user.id);
+      user.stripe_customer_id = customer.id;
     }
-  })();
+
+    const session = await stripe.checkout.sessions.create({
+      customer: user.stripe_customer_id,
+      mode: 'subscription',
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: { name: `Main Menu ${PLANS[plan].name}` },
+          unit_amount: PLANS[plan].price_monthly,
+          recurring: { interval: 'month' },
+        },
+        quantity: 1,
+      }],
+      metadata: { user_id: req.user.id, plan },
+      success_url: `${APP_URL}/dashboard?subscribed=true`,
+      cancel_url: `${APP_URL}/dashboard`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Stripe checkout error:', err);
+    res.status(500).json({ error: 'Failed to create checkout session' });
+  }
 });
 
 // Manage subscription (customer portal)
-router.post('/portal', authenticate, (req, res) => {
+router.post('/portal', authenticate, async (req, res) => {
   if (!isStripeConfigured) {
     return res.status(503).json({ error: 'Stripe not configured' });
   }
@@ -116,18 +112,16 @@ router.post('/portal', authenticate, (req, res) => {
     return res.status(400).json({ error: 'No subscription to manage' });
   }
 
-  (async () => {
-    try {
-      const session = await stripe.billingPortal.sessions.create({
-        customer: user.stripe_customer_id,
-        return_url: `${APP_URL}/dashboard`,
-      });
-      res.json({ url: session.url });
-    } catch (err) {
-      console.error('Stripe portal error:', err);
-      res.status(500).json({ error: 'Failed to create portal session' });
-    }
-  })();
+  try {
+    const session = await stripe.billingPortal.sessions.create({
+      customer: user.stripe_customer_id,
+      return_url: `${APP_URL}/dashboard`,
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Stripe portal error:', err);
+    res.status(500).json({ error: 'Failed to create portal session' });
+  }
 });
 
 // Stripe webhook handler

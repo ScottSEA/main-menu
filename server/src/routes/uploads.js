@@ -24,7 +24,7 @@ const upload = multer({
     const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
     const ext = path.extname(file.originalname).toLowerCase();
 
-    if (allowedMimes.includes(file.mimetype) || allowedExts.includes(ext)) {
+    if (allowedMimes.includes(file.mimetype) && allowedExts.includes(ext)) {
       cb(null, true);
     } else {
       cb(new Error('Only JPEG, PNG, WebP, and GIF images are allowed'));

@@ -56,12 +56,18 @@ function compileMenu(menuId) {
     };
   });
 
-  // Whitelist allowed settings keys to prevent overriding structural template data
+  // Whitelist allowed settings keys and validate CSS values to prevent injection
   const ALLOWED_SETTINGS = ['fontFamily', 'backgroundColor', 'textColor', 'accentColor', 'columns', 'showPrices', 'showDescriptions', 'qrDataUrl', 'rotationInterval'];
+  const CSS_VALUE_KEYS = ['fontFamily', 'backgroundColor', 'textColor', 'accentColor'];
+  const CSS_SAFE = /^[a-zA-Z0-9 ,#().'"%-]+$/;
   const safeSettings = {};
   for (const key of ALLOWED_SETTINGS) {
     if (key in settings) {
-      safeSettings[key] = settings[key];
+      const val = settings[key];
+      if (typeof val === 'string' && CSS_VALUE_KEYS.includes(key)) {
+        if (!CSS_SAFE.test(val)) continue;
+      }
+      safeSettings[key] = val;
     }
   }
 
@@ -84,19 +90,22 @@ function publishMenu(menuId) {
   const db = getDb();
   const html = compileMenu(menuId);
 
-  // Get current max version
-  const latest = db.prepare('SELECT MAX(version) as v FROM published_snapshots WHERE menu_id = ?').get(menuId);
-  const version = (latest?.v || 0) + 1;
+  const doPublish = db.transaction(() => {
+    const latest = db.prepare('SELECT MAX(version) as v FROM published_snapshots WHERE menu_id = ?').get(menuId);
+    const version = (latest?.v || 0) + 1;
 
-  const id = crypto.randomUUID();
-  db.prepare(`
-    INSERT INTO published_snapshots (id, menu_id, version, html_content, published_at)
-    VALUES (?, ?, ?, ?, datetime('now'))
-  `).run(id, menuId, version, html);
+    const id = crypto.randomUUID();
+    db.prepare(`
+      INSERT INTO published_snapshots (id, menu_id, version, html_content, published_at)
+      VALUES (?, ?, ?, ?, datetime('now'))
+    `).run(id, menuId, version, html);
 
-  db.prepare("UPDATE menus SET status = 'published', published_at = datetime('now'), updated_at = datetime('now') WHERE id = ?").run(menuId);
+    db.prepare("UPDATE menus SET status = 'published', published_at = datetime('now'), updated_at = datetime('now') WHERE id = ?").run(menuId);
 
-  return { id, version, html };
+    return { id, version, html };
+  });
+
+  return doPublish();
 }
 
 module.exports = { compileMenu, publishMenu };

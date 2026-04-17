@@ -7,6 +7,13 @@ const { generateToken, authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function normalizeEmail(email) {
+  if (!email || typeof email !== 'string') return null;
+  const trimmed = email.trim().toLowerCase();
+  return EMAIL_RE.test(trimmed) ? trimmed : null;
+}
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -25,10 +32,19 @@ const registerLimiter = rateLimit({
 
 router.post('/register', registerLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email: rawEmail, password } = req.body;
 
-    if (!email || !password) {
+    if (!rawEmail || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const email = normalizeEmail(rawEmail);
+    if (!email) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    if (email.length > 254) {
+      return res.status(400).json({ error: 'Email address too long' });
     }
 
     if (password.length < 8) {
@@ -60,10 +76,15 @@ router.post('/register', registerLimiter, async (req, res) => {
 
 router.post('/login', authLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email: rawEmail, password } = req.body;
 
-    if (!email || !password) {
+    if (!rawEmail || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const email = normalizeEmail(rawEmail);
+    if (!email) {
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const db = getDb();
@@ -87,9 +108,14 @@ router.post('/login', authLimiter, async (req, res) => {
 
 router.post('/forgot-password', authLimiter, async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) {
+    const { email: rawEmail } = req.body;
+    if (!rawEmail) {
       return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const email = normalizeEmail(rawEmail);
+    if (!email) {
+      return res.json({ message: 'If that email is registered, a reset link has been sent.' });
     }
 
     const db = getDb();
@@ -123,7 +149,7 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
   }
 });
 
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', authLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) {
